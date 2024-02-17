@@ -1,0 +1,220 @@
+openapi: 3.0.0
+
+info:
+  title: Products API
+  version: 1.0.0 Beta
+  description: Products API, implemented with OpenAPI Codegen
+
+paths:
+  /products:
+    post:
+      summary: add product
+      operationId: addProduct
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductDTO'
+      responses:
+        '201':
+          description: Product added successfully
+
+    get:
+      summary: Retrieves all product available
+      operationId: getAllProducts
+      responses:
+        '200':
+          description: Retrieve success response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProductDTO'
+        '404':
+          description: No product was found
+
+  /products/productName:
+    get:
+      summary: Retrieve product(s) by product name
+      operationId: getProductByProductName
+      parameters:
+        - name: productName
+          in: path
+          description: name of product to retrieve
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Retrieve success response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProductDTO'
+        '404':
+          description: Product not found
+
+  /products/productNumber:
+    get:
+      summary: Retrieve product(s) by product number
+      operationId: getUsersByLastName
+      parameters:
+        - name: productNumber
+          in: path
+          description: product number of product to retrieve
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Retrieve success response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProductDTO'
+        '404':
+          description: Product not found
+
+  /products/expirationDate:
+    get:
+      summary: Retrieve product(s) by expiration date
+      operationId: getProductByExpirationDate
+      parameters:
+        - name: expirationDate
+          in: path
+          description: expiration date of product to retrieve
+          required: true
+          schema:
+            type: date
+      responses:
+        '200':
+          description: Retrieve success response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProductDTO'
+        '404':
+          description: Product not found
+
+  /products/id/{id}:
+    get:
+      summary: Retrieve a Product by id
+      operationId: getProductById
+      parameters:
+        - name: id
+          in: path
+          description: id of a product to retrieve
+          required: true
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Retrieve success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductDTO'
+        '404':
+          description: Product not found
+
+    delete:
+      summary: Remove a product by id
+      operationId: removeProductById
+      parameters:
+        - name: id
+          in: path
+          description: id of a product to remove
+          required: true
+          schema:
+            type: number
+      responses:
+        '204':
+          description: Product removed successfully
+        '404':
+          description: Product not found
+
+    put:
+      summary: update a Product by id
+      operationId: updateProductById
+      parameters:
+        - name: id
+          in: path
+          description: id of a Product to update
+          required: true
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductDTO'
+      responses:
+        '200':
+          description: Product updated successfully
+        '404':
+          description: Product not found
+
+  /products/search:
+    get:
+      summary: Retrieves product by search
+      operationId: searchProduct
+      parameters:
+        - name: id
+          in: query
+          description: id of a product to search
+          required: false
+          schema:
+            type: number
+        - name: productName
+          in: query
+          description: product name of a product to search
+          required: false
+          schema:
+            type: string
+        - name: productNumber
+          in: query
+          description: product number of a product to search
+          required: false
+          schema:
+            type: string
+        - name: expirationDate
+          in: query
+          description: expiration date of a product to search
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Product query successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProductDTO'
+        '404':
+          description: Product not found
+
+components:
+  schemas:
+    ProductDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        productName:
+          type: string
+        productNumber:
+          type: string
+        expirationDate:
+          type: date

@@ -1,0 +1,252 @@
+openapi: 3.0.0
+
+info:
+  title: Addresses API
+  version: 1.0.0 Beta
+  description: Addresses API, implemented with OpenAPI Codegen
+
+paths:
+  /addresses:
+    post:
+      summary: add an address
+      operationId: addAddress
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddressDTO'
+      responses:
+        '201':
+          description: Address added successfully
+
+    get:
+      summary: Retrieves all  addresses
+      operationId: getAllAddresses
+      responses:
+        '200':
+          description: Retrieve success response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AddressDTO'
+        '404':
+          description: No address was found
+
+  /addresses/city:
+    get:
+      summary: Retrieve address(es) by city
+      operationId: getAddressByCity
+      parameters:
+        - name: city
+          in: path
+          description: city of addresses to retrieve
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Retrieve success response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AddressDTO'
+        '404':
+          description: Addresses not found
+
+  /addresses/streetName:
+    get:
+      summary: Retrieve address(es) by street name
+      operationId: getAddressByStreetName
+      parameters:
+        - name: streetName
+          in: path
+          description: Street name of addresses to retrieve
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Retrieve success response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AddressDTO'
+        '404':
+          description: Address not found
+
+  /addresses/houseNumber:
+    get:
+      summary: Retrieve address by house number
+      operationId: getAddressByHouseNumber
+      parameters:
+        - name: houseNumber
+          in: path
+          description: house number of address to retrieve
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Retrieve success response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AddressDTO'
+        '404':
+          description: Address not found
+
+  /addresses/zipCode:
+    get:
+      summary: Retrieve address(es) by last name
+      operationId: getAddressByZipCode
+      parameters:
+        - name: zipCode
+          in: path
+          description: zip code of address to retrieve
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Retrieve success response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AddressDTO'
+        '404':
+          description: Address not found
+
+  /addresses/id/{id}:
+    get:
+      summary: Retrieve an address by id
+      operationId: getAddressById
+      parameters:
+        - name: id
+          in: path
+          description: id of address to retrieve
+          required: true
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Retrieve success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddressDTO'
+        '404':
+          description: address not found
+
+    delete:
+      summary: Remove an address by id
+      operationId: removeAddressById
+      parameters:
+        - name: id
+          in: path
+          description: id of an address to remove
+          required: true
+          schema:
+            type: number
+      responses:
+        '204':
+          description: Address removed successfully
+        '404':
+          description: address not found
+
+    put:
+      summary: update address by id
+      operationId: updateAddressById
+      parameters:
+        - name: id
+          in: path
+          description: id of an address to update
+          required: true
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddressDTO'
+      responses:
+        '200':
+          description: Address updated successfully
+        '404':
+          description: Address not found
+
+  /addresses/search:
+    get:
+      summary: Retrieves address by search
+      operationId: searchAddresses
+      parameters:
+        - name: id
+          in: query
+          description: id of an address to search
+          required: false
+          schema:
+            type: number
+        - name: city
+          in: query
+          description: city of an address to search
+          required: false
+          schema:
+            type: string
+        - name: StreetName
+          in: query
+          description: street name of an address to search
+          required: false
+          schema:
+            type: string
+        - name: houseNumber
+          in: query
+          description: house number of an address to search
+          required: false
+          schema:
+            type: string
+        - name: zipCode
+          in: query
+          description: zip code of an address to search
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Address query successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AddressDTO'
+        '404':
+          description: address not found
+
+
+components:
+  schemas:
+    AddressDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        city:
+          type: string
+        streetName:
+          type: string
+        houseNumber:
+          type: string
+        zipCode:
+          type: string
