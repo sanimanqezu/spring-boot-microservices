@@ -21,8 +21,8 @@ public class User {
     @Column(name = "rsa_id")
     private String rsaId;
 
-    @Column(name = "address_id")
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "address_id")
     private Address address;
 
 }

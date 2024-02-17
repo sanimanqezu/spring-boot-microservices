@@ -1,0 +1,222 @@
+openapi: 3.0.0
+
+info:
+  title: Orders API
+  version: 1.0.0 Beta
+  description: Orders API, implemented with OpenAPI Codegen
+
+paths:
+  /orders:
+    post:
+      summary: add an order
+      operationId: addOrder
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderDTO'
+      responses:
+        '201':
+          description: Order added successfully
+
+    get:
+      summary: Retrieves all orders available
+      operationId: getAllOrders
+      responses:
+        '200':
+          description: Retrieve success response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderDTO'
+        '404':
+          description: No order was found
+
+  /orders/orderNumber:
+    get:
+      summary: Retrieve order by order number
+      operationId: getOrderByOrderNumber
+      parameters:
+        - name: orderNumber
+          in: path
+          description: Order number of an order to retrieve
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Retrieve success response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderDTO'
+        '404':
+          description: Order not found
+
+  /orders/quantity:
+    get:
+      summary: Retrieve orders by quantity
+      operationId: getOrderByQuantity
+      parameters:
+        - name: quantity
+          in: path
+          description: quantity of orders to retrieve
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Retrieve success response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderDTO'
+        '404':
+          description: Order not found
+
+  /orders/products:
+    get:
+      summary: Retrieve order by product
+      operationId: getOrderByProduct
+      parameters:
+        - name: product
+          in: path
+          description: product of order to retrieve
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Retrieve success response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderDTO'
+        '404':
+          description: Order not found
+
+  /orders/id/{id}:
+    get:
+      summary: Retrieve order by id
+      operationId: getOrderById
+      parameters:
+        - name: id
+          in: path
+          description: id of an order to retrieve
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Retrieve success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderDTO'
+        '404':
+          description: Order not found
+
+    delete:
+      summary: Remove order by id
+      operationId: removeOrderById
+      parameters:
+        - name: id
+          in: path
+          description: id of a order to remove
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Order removed successfully
+        '404':
+          description: Order not found
+
+    put:
+      summary: update an order by id
+      operationId: updateOrderById
+      parameters:
+        - name: id
+          in: path
+          description: id of a order to update
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderDTO'
+      responses:
+        '200':
+          description: Order updated successfully
+        '404':
+          description: Order not found
+
+  /orders/search:
+    get:
+      summary: Retrieves Order by search
+      operationId: searchOrders
+      parameters:
+        - name: id
+          in: query
+          description: id of a Order to search
+          required: false
+          schema:
+            type: string
+        - name: orderNumber
+          in: query
+          description: Order number of an order to search
+          required: false
+          schema:
+            type: string
+        - name: quantity
+          in: query
+          description: quantity of an order to search
+          required: false
+          schema:
+            type: integer
+        - name: product
+          in: query
+          description: product of an order to search
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Order query successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderDTO'
+        '404':
+          description: Order not found
+
+components:
+  schemas:
+    OrderDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        orderNumber:
+          type: string
+        quantity:
+          type: integer
+        products:
+          type: array
+          items:
+            type: string
