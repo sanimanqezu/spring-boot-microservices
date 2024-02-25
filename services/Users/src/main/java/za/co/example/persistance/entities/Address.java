@@ -1,16 +1,17 @@
 package za.co.example.persistance.entities;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
+import za.co.example.basePK.EntitiesPK;
 
-import java.util.UUID;
-
-@Entity(name = "address")
-public class Address {
-
-    @Id
-    @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private UUID id;
+@Setter
+@Getter
+@Entity
+@Table(name = "address")
+public class Address extends EntitiesPK {
 
     @Column(name = "city")
     private String city;

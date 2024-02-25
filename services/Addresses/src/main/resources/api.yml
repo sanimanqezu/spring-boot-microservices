@@ -41,7 +41,7 @@ paths:
       operationId: getAddressByCity
       parameters:
         - name: city
-          in: path
+          in: query
           description: city of addresses to retrieve
           required: true
           schema:
@@ -64,7 +64,7 @@ paths:
       operationId: getAddressByStreetName
       parameters:
         - name: streetName
-          in: path
+          in: query
           description: Street name of addresses to retrieve
           required: true
           schema:
@@ -87,7 +87,7 @@ paths:
       operationId: getAddressByHouseNumber
       parameters:
         - name: houseNumber
-          in: path
+          in: query
           description: house number of address to retrieve
           required: true
           schema:
@@ -110,7 +110,7 @@ paths:
       operationId: getAddressByZipCode
       parameters:
         - name: zipCode
-          in: path
+          in: query
           description: zip code of address to retrieve
           required: true
           schema:
@@ -127,17 +127,18 @@ paths:
         '404':
           description: Address not found
 
-  /addresses/id/{id}:
+  /addresses/id:
     get:
       summary: Retrieve an address by id
       operationId: getAddressById
       parameters:
         - name: id
-          in: path
+          in: query
           description: id of address to retrieve
           required: true
           schema:
-            type: number
+            type: string
+            format: uuid
       responses:
         '200':
           description: Retrieve success response
@@ -153,11 +154,12 @@ paths:
       operationId: removeAddressById
       parameters:
         - name: id
-          in: path
+          in: query
           description: id of an address to remove
           required: true
           schema:
-            type: number
+            type: string
+            format: uuid
       responses:
         '204':
           description: Address removed successfully
@@ -169,11 +171,12 @@ paths:
       operationId: updateAddressById
       parameters:
         - name: id
-          in: path
+          in: query
           description: id of an address to update
           required: true
           schema:
-            type: number
+            type: string
+            format: uuid
       requestBody:
         required: true
         content:
@@ -196,7 +199,8 @@ paths:
           description: id of an address to search
           required: false
           schema:
-            type: number
+            type: string
+            format: uuid
         - name: city
           in: query
           description: city of an address to search
@@ -239,9 +243,6 @@ components:
     AddressDTO:
       type: object
       properties:
-        id:
-          type: string
-          format: uuid
         city:
           type: string
         streetName:

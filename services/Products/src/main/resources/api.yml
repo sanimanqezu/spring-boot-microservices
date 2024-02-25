@@ -38,10 +38,10 @@ paths:
   /products/productName:
     get:
       summary: Retrieve product(s) by product name
-      operationId: getProductByProductName
+      operationId: getProductByName
       parameters:
         - name: productName
-          in: path
+          in: query
           description: name of product to retrieve
           required: true
           schema:
@@ -61,14 +61,37 @@ paths:
   /products/productNumber:
     get:
       summary: Retrieve product(s) by product number
-      operationId: getUsersByLastName
+      operationId: getProductsByNumber
       parameters:
         - name: productNumber
-          in: path
+          in: query
           description: product number of product to retrieve
           required: true
           schema:
             type: string
+      responses:
+        '200':
+          description: Retrieve success response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProductDTO'
+        '404':
+          description: Product not found
+
+  /products/quantity:
+    get:
+      summary: Retrieve product(s) by product quantity
+      operationId: getProductsByQuantity
+      parameters:
+        - name: quantity
+          in: query
+          description: product quantity of product to retrieve
+          required: true
+          schema:
+            type: integer
       responses:
         '200':
           description: Retrieve success response
@@ -87,7 +110,7 @@ paths:
       operationId: getProductByExpirationDate
       parameters:
         - name: expirationDate
-          in: path
+          in: query
           description: expiration date of product to retrieve
           required: true
           schema:
@@ -104,17 +127,18 @@ paths:
         '404':
           description: Product not found
 
-  /products/id/{id}:
+  /products/id:
     get:
       summary: Retrieve a Product by id
       operationId: getProductById
       parameters:
         - name: id
-          in: path
+          in: query
           description: id of a product to retrieve
           required: true
           schema:
-            type: number
+            type: string
+            format: uuid
       responses:
         '200':
           description: Retrieve success response
@@ -130,11 +154,12 @@ paths:
       operationId: removeProductById
       parameters:
         - name: id
-          in: path
+          in: query
           description: id of a product to remove
           required: true
           schema:
-            type: number
+            type: string
+            format: uuid
       responses:
         '204':
           description: Product removed successfully
@@ -146,11 +171,12 @@ paths:
       operationId: updateProductById
       parameters:
         - name: id
-          in: path
+          in: query
           description: id of a Product to update
           required: true
           schema:
-            type: number
+            type: string
+            format: uuid
       requestBody:
         required: true
         content:
@@ -173,7 +199,8 @@ paths:
           description: id of a product to search
           required: false
           schema:
-            type: number
+            type: string
+            format: uuid
         - name: productName
           in: query
           description: product name of a product to search
@@ -186,12 +213,18 @@ paths:
           required: false
           schema:
             type: string
+        - name: quantity
+          in: query
+          description: product quantity of a product to search
+          required: false
+          schema:
+            type: integer
         - name: expirationDate
           in: query
           description: expiration date of a product to search
           required: false
           schema:
-            type: string
+            type: date
       responses:
         '200':
           description: Product query successfully
@@ -209,12 +242,11 @@ components:
     ProductDTO:
       type: object
       properties:
-        id:
-          type: string
-          format: uuid
         productName:
           type: string
         productNumber:
           type: string
+        quantity:
+          type: integer
         expirationDate:
           type: date

@@ -1,25 +1,21 @@
 package za.co.example.persistance.entities;
 
 import jakarta.persistence.*;
+import za.co.example.basePK.EntitiesPK;
 
 import java.util.List;
-import java.util.UUID;
 
-@Entity(name = "order")
-public class Order {
-
-    @Id
-    @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private UUID id;
+@Entity
+@Table(name = "order")
+public class Order extends EntitiesPK {
 
     @Column(name = "order_number")
     private String orderNumber;
 
-    @Column(name = "quantity")
+    @Column(name = "product_quantity")
     private Integer quantity;
 
-    @Column(name = "products")
-    @ElementCollection
-    private List<String> products;
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "product")
+    private List<Product> products;
 }

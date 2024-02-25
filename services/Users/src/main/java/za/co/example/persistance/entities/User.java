@@ -1,16 +1,16 @@
 package za.co.example.persistance.entities;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+import org.threeten.bp.LocalDate;
+import za.co.example.basePK.EntitiesPK;
 
-import java.util.UUID;
-
-@Entity(name = "user")
-public class User {
-
-    @Id
-    @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private UUID id;
+@Setter
+@Getter
+@Entity
+@Table(name = "user")
+public class User extends EntitiesPK {
 
     @Column(name = "first_name")
     private String firstName;
@@ -21,7 +21,10 @@ public class User {
     @Column(name = "rsa_id")
     private String rsaId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @Column(name = "date_of_birth")
+    private LocalDate dateOfBirth;
+
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "address_id")
     private Address address;
 

@@ -8,6 +8,8 @@ info:
 paths:
   /users:
     post:
+      tags:
+        - user, users
       summary: Creates a user
       operationId: addUser
       requestBody:
@@ -21,6 +23,8 @@ paths:
           description: User added successfully
 
     get:
+      tags:
+        - user, users
       summary: Retrieves all users that a user has access to
       operationId: getAllUsers
       responses:
@@ -37,11 +41,13 @@ paths:
 
   /users/firstName:
     get:
+      tags:
+        - user, users
       summary: Retrieve user(s) by first name
       operationId: getUsersByFirstName
       parameters:
         - name: firstName
-          in: path
+          in: query
           description: first name of users to retrieve
           required: true
           schema:
@@ -60,11 +66,13 @@ paths:
 
   /users/lastName:
     get:
+      tags:
+        - user, users
       summary: Retrieve user(s) by last name
       operationId: getUsersByLastName
       parameters:
         - name: lastName
-          in: path
+          in: query
           description: last name of users to retrieve
           required: true
           schema:
@@ -83,11 +91,13 @@ paths:
 
   /users/rsaId:
     get:
+      tags:
+        - user, users
       summary: Retrieve user(s) by rsa id
       operationId: getUsersByRsaId
       parameters:
         - name: rsaId
-          in: path
+          in: query
           description: rsa id of users to retrieve
           required: true
           schema:
@@ -98,23 +108,23 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
                   $ref: '#/components/schemas/UserDTO'
         '404':
           description: Users not found
 
   /users/dateOfBirth:
     get:
+      tags:
+        - user, users
       summary: Retrieve user(s) by last name
       operationId: getUsersByDateOfBirth
       parameters:
         - name: dateOfBirth
-          in: path
+          in: query
           description: date of birth of users to retrieve
           required: true
           schema:
-            type: string
+            type: date
       responses:
         '200':
           description: Retrieve success response
@@ -129,11 +139,13 @@ paths:
 
   /users/addressId:
     get:
+      tags:
+        - user, users
       summary: Retrieve user(s) by last name
-      operationId: getUsersByaddressId
+      operationId: getUsersByAddressId
       parameters:
         - name: addressId
-          in: path
+          in: query
           description: address id of users to retrieve
           required: true
           schema:
@@ -146,21 +158,24 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/AddressDTO'
+                  $ref: '#/components/schemas/UserDTO'
         '404':
           description: Users not found
 
-  /users/id/{id}:
+  /users/id:
     get:
+      tags:
+        - user, users
       summary: Retrieve a user by id
       operationId: getUserById
       parameters:
         - name: id
-          in: path
+          in: query
           description: id of a user to retrieve
           required: true
           schema:
-            type: number
+            type: string
+            format: uuid
       responses:
         '200':
           description: Retrieve success response
@@ -172,15 +187,18 @@ paths:
           description: User not found
 
     delete:
+      tags:
+        - user, users
       summary: Remove a user by id
       operationId: removeUserById
       parameters:
         - name: id
-          in: path
+          in: query
           description: id of a user to remove
           required: true
           schema:
-            type: number
+            type: string
+            format: uuid
       responses:
         '204':
           description: User removed successfully
@@ -188,15 +206,18 @@ paths:
           description: User not found
 
     put:
+      tags:
+        - user, users
       summary: update a user by id
       operationId: updateUserById
       parameters:
         - name: id
-          in: path
+          in: query
           description: id of a user to update
           required: true
           schema:
-            type: number
+            type: string
+            format: uuid
       requestBody:
         required: true
         content:
@@ -211,6 +232,8 @@ paths:
 
   /users/search:
     get:
+      tags:
+        - user, users
       summary: Retrieves user by search
       operationId: searchUsers
       parameters:
@@ -219,7 +242,8 @@ paths:
           description: id of a user to search
           required: false
           schema:
-            type: number
+            type: string
+            format: uuid
         - name: firstName
           in: query
           description: first name of a user to search
@@ -229,6 +253,18 @@ paths:
         - name: lastName
           in: query
           description: last name of a user to search
+          required: false
+          schema:
+            type: string
+        - name: dateOfBirth
+          in: query
+          description: date of birth of a user to search
+          required: false
+          schema:
+            type: date
+        - name: address
+          in: query
+          description: address of a user to search
           required: false
           schema:
             type: string
@@ -255,24 +291,21 @@ components:
     UserDTO:
       type: object
       properties:
-        id:
-          type: string
-          format: uuid
         firstName:
           type: string
         lastName:
           type: string
         rsaId:
           type: string
+        dateOfBirth:
+          type: date
+          example: "2000-01-01"
         address:
           $ref: '#/components/schemas/AddressDTO'
 
     AddressDTO:
       type: object
       properties:
-        id:
-          type: string
-          format: uuid
         city:
           type: string
         streetName:
