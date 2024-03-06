@@ -8,10 +8,10 @@ import za.co.example.persistance.entities.Address;
 import java.util.UUID;
 
 public interface AddressRepository extends JpaRepository<Address, UUID> {
-    @Query("SELECT a FROM Address a WHERE LOWER(a.city) = LOWER(:city) " +
+    @Query(value = "SELECT a FROM address a WHERE LOWER(a.city) = LOWER(:city) " +
             "AND LOWER(a.streetName) = LOWER(:streetName) " +
             "AND LOWER(a.houseNumber) = LOWER(:houseNumber) " +
-            "AND LOWER(a.zipCode) = LOWER(:zipCode)")
+            "AND LOWER(a.zipCode) = LOWER(:zipCode)", nativeQuery = true)
     Address findByCityAndStreetNameAndHouseNumberAndZipCode(@Param("city") String city, @Param("streetName") String streetName,
                                                             @Param("houseNumber") String houseNumber, @Param("zipCode") String zipCode);
 }

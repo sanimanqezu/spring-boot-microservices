@@ -1,6 +1,8 @@
 package za.co.example.persistance.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import za.co.example.persistance.entities.Order;
 
 import java.util.List;
@@ -11,6 +13,8 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
 
     List<Order> findByQuantity(Integer quantity);
 
-    List<Order> findByProduct(String product);
+    Order findByOrdererIdNo(String ordererIdNo);
 
+    @Query("SELECT DISTINCT o FROM Order o JOIN o.products p WHERE KEY(p) = :productName ORDER BY o.id")
+    List<Order> findOrdersByProductName(@Param("productName") String productName);
 }

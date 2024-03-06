@@ -3,6 +3,7 @@ package za.co.example.persistance.entities;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.GenericGenerator;
 import org.threeten.bp.LocalDate;
 import za.co.example.basePK.EntitiesPK;
 
@@ -10,7 +11,16 @@ import za.co.example.basePK.EntitiesPK;
 @Getter
 @Entity
 @Table(name = "user")
-public class User extends EntitiesPK {
+public class User {
+
+    @Id
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(
+            name = "UUID",
+            strategy = "org.hibernate.id.UUIDGenerator"
+    )
+    @Column(name = "id", updatable = false, nullable = false)
+    private String id;
 
     @Column(name = "first_name")
     private String firstName;

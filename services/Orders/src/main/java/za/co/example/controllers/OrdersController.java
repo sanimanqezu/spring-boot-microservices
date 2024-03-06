@@ -2,12 +2,14 @@ package za.co.example.controllers;
 
 import com.example.orders_service.api.OrdersApi;
 import com.example.orders_service.models.OrderDTO;
+import com.example.orders_service.models.ProductDTO;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+import org.threeten.bp.LocalDateTime;
 import za.co.example.core.services.IOrdersService;
 
 import java.util.List;
@@ -47,9 +49,13 @@ public class OrdersController implements OrdersApi{
     }
 
     @Override
-    public ResponseEntity<List<OrderDTO>> getOrdersByProduct(String product) {
-        logger.info("Retrieving order(s) by product name: {}", product);
-        return ResponseEntity.ok(ordersService.getOrdersByProduct(product));
+    public ResponseEntity<OrderDTO> getOrderByOrdererIdNo(String ordererIdNo) {
+        return ResponseEntity.ok(ordersService.getOrderByOrdererIdNo(ordererIdNo));
+    }
+
+    @Override
+    public ResponseEntity<List<OrderDTO>> getOrderByProductName(String productName) {
+        return ResponseEntity.ok(ordersService.getOrderByProductName(productName));
     }
 
     @Override

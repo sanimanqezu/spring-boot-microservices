@@ -1,15 +1,26 @@
 package za.co.example.persistance.entities;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import za.co.example.basePK.EntitiesPK;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.annotations.GenericGenerator;
 
 import java.time.LocalDateTime;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "product")
-public class Product extends EntitiesPK {
+public class Product {
+
+    @Id
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(
+            name = "UUID",
+            strategy = "org.hibernate.id.UUIDGenerator"
+    )
+    @Column(name = "id", updatable = false, nullable = false)
+    private String id;
 
     @Column(name = "product_name")
     private String productName;
@@ -22,5 +33,4 @@ public class Product extends EntitiesPK {
 
     @Column(name = "expiration_date")
     private LocalDateTime expirationDate;
-
 }

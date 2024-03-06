@@ -1,6 +1,8 @@
 package za.co.example.persistance.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import za.co.example.persistance.entities.Address;
 
 import java.util.List;
@@ -14,5 +16,9 @@ public interface AddressRepository extends JpaRepository<Address, UUID> {
     List<Address> findByHouseNumber(String houseNumber);
 
     List<Address> findByZipCode(String zipCode);
+
+    Address findByCityIgnoreCaseAndStreetNameIgnoreCaseAndHouseNumberIgnoreCaseAndZipCodeIgnoreCase(
+            String city, String streetName, String houseNumber, String zipCode
+    );
 
 }
