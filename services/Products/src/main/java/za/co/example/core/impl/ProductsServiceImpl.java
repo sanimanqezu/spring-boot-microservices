@@ -2,13 +2,13 @@ package za.co.example.core.impl;
 
 import com.example.products_service.models.ProductDTO;
 import org.springframework.stereotype.Service;
-import org.threeten.bp.LocalDate;
 import za.co.example.core.services.IProductsService;
 import za.co.example.exceptions.ProductNotFoundException;
 import za.co.example.exceptions.ProductsNotFoundException;
 import za.co.example.mappers.ProductMapper;
 import za.co.example.persistance.repositories.ProductRepository;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -81,7 +81,7 @@ public class ProductsServiceImpl implements IProductsService {
     }
 
     @Override
-    public List<ProductDTO> getProductsByExpirationDate(LocalDate expirationDate) {
+    public List<ProductDTO> getProductsByExpirationDate(LocalDateTime expirationDate) {
         List<ProductDTO> products = ProductMapper.PRODUCT_MAPPER.entityToDto(productRepository.findByExpirationDate(expirationDate));
         if (products == null || products.isEmpty()) {
             throw new ProductsNotFoundException("Expiration Date", expirationDate);
@@ -102,7 +102,7 @@ public class ProductsServiceImpl implements IProductsService {
     }
 
     @Override
-    public List<ProductDTO> searchProducts(UUID id, String productName, String productNumber, Integer quantity, LocalDate expirationDate) {
+    public List<ProductDTO> searchProducts(UUID id, String productName, String productNumber, Integer quantity, LocalDateTime expirationDate) {
         List<ProductDTO> products = new ArrayList<>();
         if (id != null) {
             products.add(ProductMapper.PRODUCT_MAPPER.entityToDto(productRepository.findById(id).get()));

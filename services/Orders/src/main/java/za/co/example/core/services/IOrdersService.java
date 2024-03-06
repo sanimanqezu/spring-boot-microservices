@@ -19,8 +19,9 @@ public interface IOrdersService {
 
     List<OrderDTO> getOrdersByQuality(Integer quality);
 
-    List<OrderDTO> getOrdersByProduct(String product);
+    OrderDTO getOrderByOrdererIdNo(String ordererIdNo);
 
+    List<OrderDTO> getOrderByProductName(String productName);
 
     void updateOrder(UUID id, OrderDTO updatedOrder);
 

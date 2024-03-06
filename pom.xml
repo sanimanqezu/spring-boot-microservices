@@ -15,5 +15,28 @@
         <module>services/Orders</module>
         <module>services/Products</module>
         <module>services/Users</module>
+        <module>services/ConfigServer</module>
+        <module>services/EurekaServer</module>
+        <module>services/GatewayService</module>
     </modules>
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
+            <version>3.2.3</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-config-server</artifactId>
+            <version>4.1.0</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-netflix-eureka-server</artifactId>
+            <version>4.1.0</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
 </project>

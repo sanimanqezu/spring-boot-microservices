@@ -207,7 +207,7 @@ paths:
           required: false
           schema:
             type: string
-        - name: StreetName
+        - name: streetName
           in: query
           description: street name of an address to search
           required: false
@@ -236,6 +236,49 @@ paths:
                   $ref: '#/components/schemas/AddressDTO'
         '404':
           description: address not found
+
+  /addresses/address:
+    get:
+      summary: Retrieving address by address obj
+      operationId: getAddressByAddressArgs
+      parameters:
+        - name: city
+          in: query
+          description: city of an address to search
+          required: false
+          schema:
+            type: string
+        - name: streetName
+          in: query
+          description: street name of an address to search
+          required: false
+          schema:
+            type: string
+        - name: houseNumber
+          in: query
+          description: house number of an address to search
+          required: false
+          schema:
+            type: string
+        - name: zipCode
+          in: query
+          description: zip code of an address to search
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Address retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddressDTO'
+        '201':
+          description: Address added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddressDTO'
 
 
 components:

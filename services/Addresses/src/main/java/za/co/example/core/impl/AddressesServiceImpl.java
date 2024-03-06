@@ -1,17 +1,20 @@
 package za.co.example.core.impl;
 
 import com.example.addresses_service.models.AddressDTO;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import za.co.example.core.services.IAddressesService;
 import za.co.example.exceptions.AddressNotFoundException;
 import za.co.example.exceptions.AddressesNotFoundException;
 import za.co.example.mappers.AddressMapper;
+import za.co.example.persistance.entities.Address;
 import za.co.example.persistance.repositories.AddressRepository;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 public class AddressesServiceImpl implements IAddressesService {
 
@@ -89,7 +92,7 @@ public class AddressesServiceImpl implements IAddressesService {
 
     @Override
     public List<AddressDTO> getAddressesByZipCode(String zipCode) {
-        List<AddressDTO> addresses = AddressMapper.ADDRESS_MAPPER.entityToDto(addressRepository.findByHouseNumber(zipCode));
+        List<AddressDTO> addresses = AddressMapper.ADDRESS_MAPPER.entityToDto(addressRepository.findByZipCode(zipCode));
         if (addresses == null || addresses.isEmpty()) {
             throw new AddressesNotFoundException("Zip Code", zipCode);
         }
@@ -105,6 +108,25 @@ public class AddressesServiceImpl implements IAddressesService {
             if (updatedAddress.getHouseNumber() != null && !updatedAddress.getHouseNumber().isEmpty()) existingAddress.setHouseNumber(updatedAddress.getHouseNumber());
             if (updatedAddress.getZipCode() != null && !updatedAddress.getZipCode().isEmpty() ) existingAddress.setZipCode(updatedAddress.getZipCode());
             addressRepository.save(AddressMapper.ADDRESS_MAPPER.dtoToEntity(updatedAddress));
+        }
+    }
+
+    @Override
+    public AddressDTO getAddressAddressArgs(String city, String streetName, String houseNumber, String zipCode) {
+        AddressDTO existingAddressDTO = AddressMapper.ADDRESS_MAPPER.entityToDto(addressRepository
+                .findByCityIgnoreCaseAndStreetNameIgnoreCaseAndHouseNumberIgnoreCaseAndZipCodeIgnoreCase(city, streetName, houseNumber,zipCode));
+        log.info("Existing Address: {}", existingAddressDTO != null ? existingAddressDTO : "Address does not exist");
+        if (existingAddressDTO != null) {
+            return existingAddressDTO;
+        } else {
+            AddressDTO addressDTO = new AddressDTO()
+                    .city(city)
+                            .houseNumber(houseNumber)
+                                    .streetName(streetName)
+                                            .zipCode(zipCode);
+            log.info("Saving address: " + addressDTO);
+            return AddressMapper.ADDRESS_MAPPER.entityToDto(addressRepository
+                    .save(AddressMapper.ADDRESS_MAPPER.dtoToEntity(addressDTO)));
         }
     }
 

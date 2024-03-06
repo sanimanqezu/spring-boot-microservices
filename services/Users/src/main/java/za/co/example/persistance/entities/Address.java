@@ -1,17 +1,24 @@
 package za.co.example.persistance.entities;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import za.co.example.basePK.EntitiesPK;
+import org.hibernate.annotations.GenericGenerator;
 
 @Setter
 @Getter
 @Entity
 @Table(name = "address")
-public class Address extends EntitiesPK {
+public class Address {
+
+    @Id
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(
+            name = "UUID",
+            strategy = "org.hibernate.id.UUIDGenerator"
+    )
+    @Column(name = "id", updatable = false, nullable = false)
+    private String id;
 
     @Column(name = "city")
     private String city;

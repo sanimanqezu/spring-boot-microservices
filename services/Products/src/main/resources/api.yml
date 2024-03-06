@@ -114,7 +114,8 @@ paths:
           description: expiration date of product to retrieve
           required: true
           schema:
-            type: date
+            type: string
+            format: date-time
       responses:
         '200':
           description: Retrieve success response
@@ -224,7 +225,8 @@ paths:
           description: expiration date of a product to search
           required: false
           schema:
-            type: date
+            type: string
+            format: date-time
       responses:
         '200':
           description: Product query successfully
@@ -249,4 +251,5 @@ components:
         quantity:
           type: integer
         expirationDate:
-          type: date
+          type: string
+          format: date-time

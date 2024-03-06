@@ -1,38 +1,72 @@
 package za.co.example.core.impl;
 
 import com.example.orders_service.models.OrderDTO;
+import com.example.orders_service.models.ProductDTO;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 import za.co.example.core.services.IOrdersService;
 import za.co.example.exceptions.OrderNotFoundException;
 import za.co.example.exceptions.OrdersNotFoundException;
 import za.co.example.mappers.OrderMapper;
 import za.co.example.persistance.repositories.OrderRepository;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
+@Slf4j
+@RestController
 @Service
 public class OrdersServiceImpl implements IOrdersService {
 
     private final OrderRepository orderRepository;
 
-    public OrdersServiceImpl(OrderRepository orderRepository) {
+    private final RestTemplate restTemplate;
+
+    @Value("${product.base.url}")
+    String productsEndpoint;
+
+    @Autowired
+    public OrdersServiceImpl(OrderRepository orderRepository, RestTemplate restTemplate) {
         this.orderRepository = orderRepository;
+        this.restTemplate = restTemplate;
     }
 
     @Override
     public void addOrder(OrderDTO orderDTO) {
-        String orderNumber = orderDTO.getOrderNumber();
+        Map<String, Integer> productsToAdd = new HashMap<>();
 
-        if (orderNumber == null) {
-            throw new OrderNotFoundException("No order number found");
+        for (Map.Entry<String, Integer> entry : orderDTO.getProducts().entrySet()) {
+            String productName = entry.getKey();
+            int requestedQuantity = entry.getValue() != null ? entry.getValue() : 1;
+
+            ProductDTO productDTO = restTemplate.getForObject(productsEndpoint + "?productName={productName}", ProductDTO.class, productName);
+
+            if (productDTO != null) {
+                int availableQuantity = productDTO.getQuantity();
+                if (requestedQuantity <= availableQuantity) {
+                    productsToAdd.put(productName, requestedQuantity);
+                } else {
+                    throw new OrderNotFoundException("The are " + availableQuantity + " " + productName + " in stock!");
+                }
+            }
         }
-        orderRepository.save(OrderMapper.ORDER_MAPPER.orderDtoToOrder(orderDTO));
 
+        String orderNumber = orderDTO.getOrderNumber();
+        if (orderNumber == null) {
+            Random random = new Random();
+            int randomNumber = 10000 + random.nextInt(90000);
+            orderDTO.setOrderNumber(String.valueOf(randomNumber));
+        }
+
+        orderDTO.setProducts(productsToAdd);
+
+        orderRepository.save(OrderMapper.ORDER_MAPPER.orderDtoToOrder(orderDTO));
     }
 
-    @Override
+        @Override
     public void removeOrder(UUID id) {
         boolean order = orderRepository.existsById(id);
 
@@ -82,21 +116,24 @@ public class OrdersServiceImpl implements IOrdersService {
     }
 
     @Override
-    public List<OrderDTO> getOrdersByProduct(String product) {
-        List<OrderDTO> orders = OrderMapper.ORDER_MAPPER.orderToOrderDto(orderRepository.findByProduct(product));
-        if (orders == null || orders.isEmpty()) {
-            throw new OrdersNotFoundException("Product", product);
-        }
-        return orders;
+    public OrderDTO getOrderByOrdererIdNo(String ordererIdNo) {
+        return OrderMapper.ORDER_MAPPER.orderToOrderDto(orderRepository.findByOrdererIdNo(ordererIdNo));
+    }
+
+    @Override
+    public List<OrderDTO> getOrderByProductName(String productName) {
+        return OrderMapper.ORDER_MAPPER.orderToOrderDto(orderRepository.findOrdersByProductName(productName));
     }
 
     @Override
     public void updateOrder(UUID id, OrderDTO updatedOrder) {
         OrderDTO existingOrder = getOrderById(id);
         if (existingOrder != null && updatedOrder != null) {
-            if (updatedOrder.getOrderNumber() != null && !updatedOrder.getOrderNumber().isEmpty()) existingOrder.setOrderNumber(updatedOrder.getOrderNumber());
-            if (updatedOrder.getQuantity() != null ) existingOrder.setQuantity(updatedOrder.getQuantity());
-            if (updatedOrder.getProducts() != null && !updatedOrder.getProducts().isEmpty()) existingOrder.setProducts(updatedOrder.getProducts());
+            if (updatedOrder.getOrderNumber() != null && !updatedOrder.getOrderNumber().isEmpty())
+                existingOrder.setOrderNumber(updatedOrder.getOrderNumber());
+            if (updatedOrder.getQuantity() != null) existingOrder.setQuantity(updatedOrder.getQuantity());
+            if (updatedOrder.getProducts() != null && !updatedOrder.getProducts().isEmpty())
+                existingOrder.setProducts(updatedOrder.getProducts());
             orderRepository.save(OrderMapper.ORDER_MAPPER.orderDtoToOrder(existingOrder));
         }
 
@@ -113,9 +150,6 @@ public class OrdersServiceImpl implements IOrdersService {
         }
         if (quantity != null) {
             orders.addAll(OrderMapper.ORDER_MAPPER.orderToOrderDto(orderRepository.findByQuantity(quantity)));
-        }
-        if (product != null && !product.isEmpty()) {
-            orders.addAll(OrderMapper.ORDER_MAPPER.orderToOrderDto(orderRepository.findByProduct(product)));
         }
 
         return orders;

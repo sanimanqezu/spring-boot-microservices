@@ -1,6 +1,7 @@
 package za.co.example.core.services;
 
 import com.example.addresses_service.models.AddressDTO;
+import za.co.example.persistance.entities.Address;
 
 import java.util.List;
 import java.util.UUID;
@@ -24,6 +25,8 @@ public interface IAddressesService {
     List<AddressDTO> getAddressesByZipCode(String zipCode);
 
     void updateAddress(UUID id, AddressDTO updatedAddress);
+
+    AddressDTO getAddressAddressArgs(String city, String streetName, String houseNumber, String zipCode);
 
     List<AddressDTO> searchAddresses(UUID id, String city, String streetName, String houseNumber, String zipCode);
 }

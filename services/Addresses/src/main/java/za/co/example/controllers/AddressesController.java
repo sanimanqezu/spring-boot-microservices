@@ -85,4 +85,11 @@ public class AddressesController implements AddressesApi{
         addressesService.updateAddress(id, body);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
+
+    @Override
+    public ResponseEntity<AddressDTO> getAddressByAddressArgs(String city, String streetName, String houseNumber, String zipCode) {
+        logger.info("Getting address by the following properties: \n City: {} \n Street Name: {} \n House Number: {} \n Zip Code: {}",
+                city, streetName, houseNumber, zipCode);
+        return ResponseEntity.ok(addressesService.getAddressAddressArgs(city, streetName, houseNumber, zipCode));
+    }
 }

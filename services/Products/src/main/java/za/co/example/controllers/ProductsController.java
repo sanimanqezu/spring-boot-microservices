@@ -8,9 +8,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-import org.threeten.bp.LocalDate;
 import za.co.example.core.services.IProductsService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,7 +37,7 @@ public class ProductsController implements ProductsApi{
     }
 
     @Override
-    public ResponseEntity<List<ProductDTO>> getProductByExpirationDate(LocalDate expirationDate) {
+    public ResponseEntity<List<ProductDTO>> getProductByExpirationDate(LocalDateTime expirationDate) {
         logger.info("Retrieving product(s) by expiration date {}", expirationDate);
         return ResponseEntity.ok(productsService.getProductsByExpirationDate(expirationDate));
     }
@@ -81,7 +81,7 @@ public class ProductsController implements ProductsApi{
     }
 
     @Override
-    public ResponseEntity<List<ProductDTO>> searchProduct(UUID id, String productName, String productNumber, Integer quantity, LocalDate expirationDate) {
+    public ResponseEntity<List<ProductDTO>> searchProduct(UUID id, String productName, String productNumber, Integer quantity, LocalDateTime expirationDate) {
         logger.info("Searching product(s) by the following properties: \n Id: {} \n Product Name: {} \n  Product Number: {}\n  Product Quantity: {} \n expiration Date : {} ",
                 id, productName, productNumber, quantity, expirationDate);
         return ResponseEntity.ok(productsService.searchProducts(id, productName, productNumber, quantity, expirationDate));
