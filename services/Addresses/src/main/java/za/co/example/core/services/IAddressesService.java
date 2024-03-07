@@ -1,7 +1,6 @@
 package za.co.example.core.services;
 
 import com.example.addresses_service.models.AddressDTO;
-import za.co.example.persistance.entities.Address;
 
 import java.util.List;
 import java.util.UUID;

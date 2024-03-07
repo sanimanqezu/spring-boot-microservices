@@ -3,28 +3,28 @@ spring:
     gateway:
       routes:
         - id: address-service
-          uri: lb://ADDRESSAPPLICATION
+          uri: lb://ADDRESS-SERVICE
           predicates:
             - Path=/addresses/**
           filters:
             - StripPrefix=1
 
         - id: order-service
-          uri: lb://ORDERAPPLICATION
+          uri: lb://ORDER-SERVICE
           predicates:
             - Path=/orders/**
           filters:
             - StripPrefix=1
 
         - id: product-service
-          uri: lb://PRODUCTAPPLICATION
+          uri: lb://PRODUCT-SERVICE
           predicates:
             - Path=/products/**
           filters:
             - StripPrefix=1
 
         - id: user-service
-          uri: lb://USERAPPLICATION
+          uri: lb://USER-SERVICE
           predicates:
             - Path=/users/**
           filters:

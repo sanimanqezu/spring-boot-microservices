@@ -3,35 +3,26 @@ package za.co.example.core.impl;
 import com.example.orders_service.models.OrderDTO;
 import com.example.orders_service.models.ProductDTO;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
 import za.co.example.core.services.IOrdersService;
 import za.co.example.exceptions.OrderNotFoundException;
 import za.co.example.exceptions.OrdersNotFoundException;
 import za.co.example.mappers.OrderMapper;
 import za.co.example.persistance.repositories.OrderRepository;
+import za.co.example.proxy.ProductFeignClient;
 
 import java.util.*;
 
 @Slf4j
-@RestController
 @Service
 public class OrdersServiceImpl implements IOrdersService {
 
     private final OrderRepository orderRepository;
+    private final ProductFeignClient productFeignClient;
 
-    private final RestTemplate restTemplate;
-
-    @Value("${product.base.url}")
-    String productsEndpoint;
-
-    @Autowired
-    public OrdersServiceImpl(OrderRepository orderRepository, RestTemplate restTemplate) {
+    public OrdersServiceImpl(OrderRepository orderRepository, ProductFeignClient productFeignClient) {
         this.orderRepository = orderRepository;
-        this.restTemplate = restTemplate;
+        this.productFeignClient = productFeignClient;
     }
 
     @Override
@@ -42,14 +33,15 @@ public class OrdersServiceImpl implements IOrdersService {
             String productName = entry.getKey();
             int requestedQuantity = entry.getValue() != null ? entry.getValue() : 1;
 
-            ProductDTO productDTO = restTemplate.getForObject(productsEndpoint + "?productName={productName}", ProductDTO.class, productName);
+            ProductDTO productDTO = OrderMapper.ORDER_MAPPER
+                    .productToProductDto(productFeignClient.getProduct(productName));
 
             if (productDTO != null) {
                 int availableQuantity = productDTO.getQuantity();
                 if (requestedQuantity <= availableQuantity) {
                     productsToAdd.put(productName, requestedQuantity);
                 } else {
-                    throw new OrderNotFoundException("The are " + availableQuantity + " " + productName + " in stock!");
+                    throw new OrderNotFoundException("There are " + availableQuantity + " " + productName + " in stock!");
                 }
             }
         }
