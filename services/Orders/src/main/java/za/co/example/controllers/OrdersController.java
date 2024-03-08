@@ -2,14 +2,12 @@ package za.co.example.controllers;
 
 import com.example.orders_service.api.OrdersApi;
 import com.example.orders_service.models.OrderDTO;
-import com.example.orders_service.models.ProductDTO;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-import org.threeten.bp.LocalDateTime;
 import za.co.example.core.services.IOrdersService;
 
 import java.util.List;

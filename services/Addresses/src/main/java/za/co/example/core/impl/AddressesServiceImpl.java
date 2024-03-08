@@ -7,7 +7,6 @@ import za.co.example.core.services.IAddressesService;
 import za.co.example.exceptions.AddressNotFoundException;
 import za.co.example.exceptions.AddressesNotFoundException;
 import za.co.example.mappers.AddressMapper;
-import za.co.example.persistance.entities.Address;
 import za.co.example.persistance.repositories.AddressRepository;
 
 import java.util.ArrayList;

@@ -2,18 +2,17 @@ package za.co.example.core.impl;
 
 import com.example.users_service.models.AddressDTO;
 import com.example.users_service.models.UserDTO;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
 import org.threeten.bp.LocalDate;
 import za.co.example.core.services.IUsersService;
 import za.co.example.exceptions.UserNotFoundException;
 import za.co.example.exceptions.UsersNotFoundException;
 import za.co.example.mappers.UserMapper;
 import za.co.example.persistance.repositories.UserRepository;
+import za.co.example.proxy.AddressFeignClient;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,19 +20,12 @@ import java.util.UUID;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class UsersServiceImpl implements IUsersService {
 
     private final UserRepository userRepository;
 
-    private final RestTemplate restTemplate;
-
-    @Value("${address.base.url}")
-    String addressesEndpoint;
-
-    public UsersServiceImpl(UserRepository userRepository, RestTemplate restTemplate) {
-        this.userRepository = userRepository;
-        this.restTemplate = restTemplate;
-    }
+    private final AddressFeignClient addressFeignClient;
 
     @Transactional
     @Override
@@ -46,10 +38,12 @@ public class UsersServiceImpl implements IUsersService {
             throw new UserNotFoundException("RSA Id must have 13 digits");
         }
 
-        String uri = addressesEndpoint + "/address?city={city}&streetName={streetName}&houseNumber={houseNumber}&zipCode={zipCode}";
-
-        AddressDTO existingAddress = restTemplate.getForObject(uri, AddressDTO.class, addressDTO.getCity(),
-                addressDTO.getStreetName(), addressDTO.getHouseNumber(), addressDTO.getZipCode());
+        AddressDTO existingAddress = UserMapper.USER_MAPPER.addressToAddressDTO(
+                addressFeignClient.getAddress(
+                addressDTO.getCity(),
+                addressDTO.getStreetName(),
+                addressDTO.getHouseNumber(),
+                addressDTO.getZipCode()));
 
         if (existingAddress == null) {
             throw new UserNotFoundException("Address not found");

@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 import org.threeten.bp.LocalDate;
-import za.co.example.basePK.EntitiesPK;
 
 @Setter
 @Getter
