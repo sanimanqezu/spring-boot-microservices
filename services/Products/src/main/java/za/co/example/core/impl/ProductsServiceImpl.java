@@ -63,9 +63,9 @@ public class ProductsServiceImpl implements IProductsService {
     }
 
     @Override
-    public List<ProductDTO> getProductsByName(String productName) {
-        List<ProductDTO> products = ProductMapper.PRODUCT_MAPPER.entityToDto(productRepository.findByProductName(productName));
-        if (products == null || products.isEmpty()) {
+    public ProductDTO getProductsByName(String productName) {
+        ProductDTO products = ProductMapper.PRODUCT_MAPPER.entityToDto(productRepository.findByProductName(productName));
+        if (products == null) {
             throw new ProductsNotFoundException("Product Name", productName);
         }
         return products;
@@ -108,7 +108,7 @@ public class ProductsServiceImpl implements IProductsService {
             products.add(ProductMapper.PRODUCT_MAPPER.entityToDto(productRepository.findById(id).get()));
         }
         if (productName != null && !productName.isEmpty()) {
-            products.addAll(ProductMapper.PRODUCT_MAPPER.entityToDto(productRepository.findByProductName(productName)));
+            products.add(ProductMapper.PRODUCT_MAPPER.entityToDto(productRepository.findByProductName(productName)));
         }
         if (productNumber != null && !productNumber.isEmpty()) {
             products.addAll(ProductMapper.PRODUCT_MAPPER.entityToDto(productRepository.findByProductNumber(productNumber)));

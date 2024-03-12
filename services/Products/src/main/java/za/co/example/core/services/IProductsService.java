@@ -16,7 +16,7 @@ public interface IProductsService {
 
     ProductDTO getProductById(UUID id);
 
-    List<ProductDTO> getProductsByName(String productName);
+    ProductDTO getProductsByName(String productName);
 
     List<ProductDTO> getProductsByNumber(String productNumber);
 

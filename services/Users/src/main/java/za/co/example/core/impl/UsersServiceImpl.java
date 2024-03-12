@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.threeten.bp.LocalDate;
+import java.time.LocalDate;
 import za.co.example.core.services.IUsersService;
 import za.co.example.exceptions.UserNotFoundException;
 import za.co.example.exceptions.UsersNotFoundException;
@@ -46,11 +46,18 @@ public class UsersServiceImpl implements IUsersService {
                 addressDTO.getZipCode()));
 
         if (existingAddress == null) {
-            throw new UserNotFoundException("Address not found");
+            userDTO.setAddress(
+                    UserMapper.USER_MAPPER.addressToAddressDTO(
+                            addressFeignClient.saveAddress(
+                                    UserMapper.USER_MAPPER.addressDtoToAddress(addressDTO))
+                    )
+            );
+        } else {
+            userDTO.setAddress(existingAddress);
         }
 
-        userDTO.setAddress(existingAddress);
-
+        log.info("User dto date of birth type: " + userDTO.getDateOfBirth().getClass().getSimpleName());
+        log.info("User dto date of birth type: " + UserMapper.USER_MAPPER.userDTOToUser(userDTO).getDateOfBirth().getClass().getSimpleName());
         userRepository.save(UserMapper.USER_MAPPER.userDTOToUser(userDTO));
     }
 

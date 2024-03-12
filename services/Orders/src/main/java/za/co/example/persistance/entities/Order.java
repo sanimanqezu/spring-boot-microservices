@@ -26,7 +26,7 @@ public class Order {
     private Integer quantity;
 
     @ElementCollection
-    @CollectionTable(name = "products", joinColumns = @JoinColumn(name = "order_id"))
+    @CollectionTable(name = "product", joinColumns = @JoinColumn(name = "order_id"))
     @MapKeyColumn(name = "product_name")
     @Column(name = "products")
     private Map<String, String> products = new HashMap<>();

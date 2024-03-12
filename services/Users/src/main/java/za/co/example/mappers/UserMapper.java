@@ -23,4 +23,5 @@ public interface UserMapper {
 
     AddressDTO addressToAddressDTO(Address address);
 
+    Address addressDtoToAddress(AddressDTO dto);
 }
