@@ -27,9 +27,9 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <scope>runtime</scope>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.7.2</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -97,6 +97,17 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
         </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>4.0.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <version>2.14.2</version>
+        </dependency>
     </dependencies>
 
     <dependencyManagement>
@@ -143,7 +154,7 @@
                             <modelPackage>com.example.users-service.models</modelPackage>
                             <configOptions>
                                 <interfaceOnly>true</interfaceOnly>
-<!--                                <dateLibrary>java8-localdatetime</dateLibrary>-->
+                                <dateLibrary>java8-localdate</dateLibrary>
                             </configOptions>
                         </configuration>
                     </execution>

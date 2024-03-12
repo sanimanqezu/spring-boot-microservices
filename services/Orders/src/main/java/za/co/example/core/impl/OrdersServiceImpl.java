@@ -29,19 +29,23 @@ public class OrdersServiceImpl implements IOrdersService {
     public void addOrder(OrderDTO orderDTO) {
         Map<String, Integer> productsToAdd = new HashMap<>();
 
-        for (Map.Entry<String, Integer> entry : orderDTO.getProducts().entrySet()) {
-            String productName = entry.getKey();
-            int requestedQuantity = entry.getValue() != null ? entry.getValue() : 1;
+        if (orderDTO.getProducts() != null) {
+            for (Map.Entry<String, Integer> entry : orderDTO.getProducts().entrySet()) {
+                String productName = entry.getKey();
+                int requestedQuantity = entry.getValue() != null ? entry.getValue() : 1;
 
-            ProductDTO productDTO = OrderMapper.ORDER_MAPPER
-                    .productToProductDto(productFeignClient.getProduct(productName));
+                ProductDTO productDTO = OrderMapper.ORDER_MAPPER
+                        .productToProductDto(productFeignClient.getProduct(productName));
 
-            if (productDTO != null) {
-                int availableQuantity = productDTO.getQuantity();
-                if (requestedQuantity <= availableQuantity) {
-                    productsToAdd.put(productName, requestedQuantity);
+                if (productDTO != null) {
+                    int availableQuantity = productDTO.getQuantity();
+                    if (requestedQuantity <= availableQuantity) {
+                        productsToAdd.put(productName, requestedQuantity);
+                    } else {
+                        throw new OrderNotFoundException("There are " + availableQuantity + " " + productName + " in stock!");
+                    }
                 } else {
-                    throw new OrderNotFoundException("There are " + availableQuantity + " " + productName + " in stock!");
+                    throw new OrderNotFoundException("The are no products with name {}", productName);
                 }
             }
         }

@@ -1,7 +1,7 @@
 package za.co.example.core.services;
 
 import com.example.users_service.models.UserDTO;
-import org.threeten.bp.LocalDate;
+import java.time.LocalDate;
 
 import java.util.List;
 import java.util.UUID;

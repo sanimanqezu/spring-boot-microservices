@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
-import org.threeten.bp.LocalDate;
+import za.co.example.config.LocalDateConverter;
+
+import java.time.LocalDate;
 
 @Setter
 @Getter
@@ -31,6 +33,7 @@ public class User {
     private String rsaId;
 
     @Column(name = "date_of_birth")
+    @Convert(converter = LocalDateConverter.class)
     private LocalDate dateOfBirth;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
