@@ -1,0 +1,44 @@
+<div class="filter-section">
+
+</div>
+
+<div class="table-section">
+  <table class="table">
+
+    <thead>
+    <tr>
+      <th>ID</th>
+      <th *ngFor="let header of headers">{{ header }}</th>
+      <th>Actions</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <ng-container *ngIf="data && data.length > 0; else noData">
+      <tr *ngFor="let entry of data; let i = index">
+        <td>{{ i + 1 }}</td>
+        <td *ngFor="let item of entry">{{ item }}</td>
+        <td>
+          <button class="update-button" (click)="openUpdateModal(i)">Update</button>
+          <button class="delete-button" (click)="openConfirmationModal(i)">Delete</button>
+        </td>
+      </tr>
+    </ng-container>
+    <ng-template #noData>
+      <tr>
+        <td [attr.colspan]="headers.length + 1">No data available</td>
+      </tr>
+    </ng-template>
+    </tbody>
+  </table>
+</div>
+
+<button class="add-button" (click)="openModal()">Add</button>
+
+<div class="modal" *ngIf="showModal">
+  <!-- Modal content -->
+</div>
+
+<div class="confirmation-modal" *ngIf="showConfirmationModal">
+  <!-- Confirmation modal content -->
+</div>
