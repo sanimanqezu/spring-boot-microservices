@@ -1,3 +1,15 @@
 <div class="container">
-  <h1>Order Component</h1>
+  <app-alert *ngIf="errorMessage" [message]="errorMessage"></app-alert>
+  <h1>{{ title }} Management</h1>
+  <app-data-table
+    [data]="myData"
+    [title]="title"
+    [objectFields]="dataTableObjectFields"
+    [showModal]="dataTableShowModal"
+    [headers]="headers"
+    (saveObjectEvent)="handleSave($event)"
+    (updateObjectEvent)="handleUpdate($event)"
+    (deleteObjectEvent)="handleDelete($event)"
+  >
+  </app-data-table>
 </div>

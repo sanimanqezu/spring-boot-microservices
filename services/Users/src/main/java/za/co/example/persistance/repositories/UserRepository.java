@@ -7,7 +7,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
-public interface UserRepository extends JpaRepository<User, UUID> {
+public interface UserRepository extends JpaRepository<User, String> {
+
     List<User> findByFirstNameIgnoreCase(String firstName);
 
     List<User> findByLastNameIgnoreCase(String lastName);

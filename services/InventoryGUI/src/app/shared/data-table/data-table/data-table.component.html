@@ -8,37 +8,73 @@
     <thead>
     <tr>
       <th>ID</th>
-      <th *ngFor="let header of headers">{{ header }}</th>
-      <th>Actions</th>
+      <th *ngFor="let header of headers">{{ header.toUpperCase() }}</th>
+      <th>ACTIONS</th>
     </tr>
     </thead>
 
     <tbody>
     <ng-container *ngIf="data && data.length > 0; else noData">
-      <tr *ngFor="let entry of data; let i = index">
+      <tr *ngFor="let item of data; let i = index">
         <td>{{ i + 1 }}</td>
-        <td *ngFor="let item of entry">{{ item }}</td>
+        <ng-container *ngFor="let header of headers">
+          <td>{{ item[toCamelCase(header)] }}</td>
+        </ng-container>
         <td>
-          <button class="update-button" (click)="openUpdateModal(i)">Update</button>
-          <button class="delete-button" (click)="openConfirmationModal(i)">Delete</button>
+          <button class="action-button update-button" (click)="openUpdateModal(item.id)" [disabled]="modalOpened">Update</button>
+          <button class="action-button delete-button" (click)="openConfirmationModal(item.id)" [disabled]="modalOpened">Delete</button>
         </td>
       </tr>
     </ng-container>
     <ng-template #noData>
       <tr>
-        <td [attr.colspan]="headers.length + 1">No data available</td>
+        <td [attr.colspan]="headers.length + 2">No data available</td>
       </tr>
     </ng-template>
     </tbody>
   </table>
 </div>
 
-<button class="add-button" (click)="openModal()">Add</button>
+<button class="add-button" (click)="openModal()" [disabled]="modalOpened">Add</button>
 
 <div class="modal" *ngIf="showModal">
-  <!-- Modal content -->
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ title }}</h5>
+        <button type="button" class="close" (click)="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <ng-container *ngFor="let field of objectFields">
+          <div class="form-group">
+            <label>{{ field.label }}</label>
+            <input type="text" class="form-control" [(ngModel)]="field.value">
+          </div>
+        </ng-container>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" *ngIf="!isUpdating" (click)="saveObject()">Save</button>
+        <button type="button" class="btn btn-primary" *ngIf="isUpdating" (click)="updateObject()">Update</button>
+        <button type="button" class="btn btn-secondary" (click)="closeModal()">Close</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="confirmation-modal" *ngIf="showConfirmationModal">
-  <!-- Confirmation modal content -->
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Confirm Deletion</h5>
+        <button type="button" class="close" (click)="closeConfirmationModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to delete the selected object?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" (click)="confirmDeletion()">Yes</button>
+        <button type="button" class="btn btn-secondary" (click)="closeConfirmationModal()">No</button>
+      </div>
+    </div>
+  </div>
 </div>

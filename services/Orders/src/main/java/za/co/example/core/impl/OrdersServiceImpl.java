@@ -64,7 +64,7 @@ public class OrdersServiceImpl implements IOrdersService {
 
         @Override
     public void removeOrder(UUID id) {
-        boolean order = orderRepository.existsById(id);
+        boolean order = orderRepository.existsById(String.valueOf(id));
 
         if (!order) {
             throw new OrderNotFoundException("Id", id);
@@ -85,7 +85,7 @@ public class OrdersServiceImpl implements IOrdersService {
 
     @Override
     public OrderDTO getOrderById(UUID id) {
-        OrderDTO orderOptional = OrderMapper.ORDER_MAPPER.orderToOrderDto(orderRepository.findById(id).get());
+        OrderDTO orderOptional = OrderMapper.ORDER_MAPPER.orderToOrderDto(orderRepository.findById(String.valueOf(id)).get());
 
         if (orderOptional == null) {
             throw new OrderNotFoundException("Id", id);
@@ -139,7 +139,7 @@ public class OrdersServiceImpl implements IOrdersService {
     public List<OrderDTO> searchOrders(UUID id, String orderNumber, Integer quantity, String product) {
         List<OrderDTO> orders = new ArrayList<>();
         if (id != null) {
-            orders.add(OrderMapper.ORDER_MAPPER.orderToOrderDto(orderRepository.findById(id).get()));
+            orders.add(OrderMapper.ORDER_MAPPER.orderToOrderDto(orderRepository.findById(String.valueOf(id)).get()));
         }
         if (orderNumber != null && !orderNumber.isEmpty()) {
             orders.addAll(OrderMapper.ORDER_MAPPER.orderToOrderDto(orderRepository.findByOrderNumber(orderNumber)));

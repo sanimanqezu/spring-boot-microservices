@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public interface IAddressesService {
 
-    void addAddress(AddressDTO addressDTO);
+    AddressDTO addAddress(AddressDTO addressDTO);
 
     void removeAddress(UUID id);
 
