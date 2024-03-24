@@ -19,6 +19,10 @@ paths:
       responses:
         '201':
           description: Address added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddressDTO'
 
     get:
       summary: Retrieves all  addresses
@@ -286,6 +290,9 @@ components:
     AddressDTO:
       type: object
       properties:
+        id:
+          type: string
+          format: uuid
         city:
           type: string
         streetName:

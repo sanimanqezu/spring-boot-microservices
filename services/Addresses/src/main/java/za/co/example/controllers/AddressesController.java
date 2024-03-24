@@ -7,12 +7,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 import za.co.example.core.services.IAddressesService;
 
 import java.util.List;
 import java.util.UUID;
 
+@CrossOrigin(origins = "*")
 @RequiredArgsConstructor
 @RestController
 public class AddressesController implements AddressesApi{
@@ -23,10 +25,10 @@ public class AddressesController implements AddressesApi{
 
 
     @Override
-    public ResponseEntity<Void> addAddress(AddressDTO body) {
+    public ResponseEntity<AddressDTO> addAddress(AddressDTO body) {
         logger.info("Adding address: {}", body.toString());
         addressesService.addAddress(body);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.ok(addressesService.addAddress(body));
     }
 
     @Override

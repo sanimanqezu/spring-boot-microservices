@@ -7,12 +7,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 import za.co.example.core.services.IOrdersService;
 
 import java.util.List;
 import java.util.UUID;
 
+@CrossOrigin(origins = "http://localhost:4200")
 @RequiredArgsConstructor
 @RestController
 public class OrdersController implements OrdersApi{

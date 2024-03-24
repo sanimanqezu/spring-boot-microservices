@@ -23,24 +23,23 @@ public class AddressesServiceImpl implements IAddressesService {
     }
 
     @Override
-    public void addAddress(AddressDTO addressDTO) {
+    public AddressDTO addAddress(AddressDTO addressDTO) {
         String houseNumber = addressDTO.getHouseNumber();
 
         if (houseNumber == null) {
             throw new AddressNotFoundException("No house number found");
         }
-        addressRepository.save(AddressMapper.ADDRESS_MAPPER.dtoToEntity(addressDTO));
+        return AddressMapper.ADDRESS_MAPPER.entityToDto(addressRepository.save(AddressMapper.ADDRESS_MAPPER.dtoToEntity(addressDTO)));
     }
 
     @Override
     public void removeAddress(UUID id) {
-        boolean address = addressRepository.existsById(id);
+        boolean address = addressRepository.existsById(String.valueOf(id));
 
         if (!address) {
             throw new AddressNotFoundException("Id", id);
         }
         addressRepository.delete(AddressMapper.ADDRESS_MAPPER.dtoToEntity(getAddressById(id)));
-
     }
 
     @Override
@@ -54,7 +53,7 @@ public class AddressesServiceImpl implements IAddressesService {
 
     @Override
     public AddressDTO getAddressById(UUID id) {
-        AddressDTO AddressOptional = AddressMapper.ADDRESS_MAPPER.entityToDto(addressRepository.findById(id).get());
+        AddressDTO AddressOptional = AddressMapper.ADDRESS_MAPPER.entityToDto(addressRepository.findById(String.valueOf(id)).get());
 
         if (AddressOptional == null) {
             throw new AddressNotFoundException("Id", id);
@@ -133,7 +132,7 @@ public class AddressesServiceImpl implements IAddressesService {
     public List<AddressDTO> searchAddresses(UUID id, String city, String streetName, String houseNumber, String zipCode) {
         List<AddressDTO> addresses = new ArrayList<>();
         if (id != null) {
-            addresses.add(AddressMapper.ADDRESS_MAPPER.entityToDto(addressRepository.findById(id).get()));
+            addresses.add(AddressMapper.ADDRESS_MAPPER.entityToDto(addressRepository.findById(String.valueOf(id)).get()));
         }
         if (city != null && !city.isEmpty()) {
             addresses.addAll(AddressMapper.ADDRESS_MAPPER.entityToDto(addressRepository.findByCity(city)));

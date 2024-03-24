@@ -34,7 +34,7 @@ public class ProductsServiceImpl implements IProductsService {
 
     @Override
     public void removeProduct(UUID id) {
-        boolean product = productRepository.existsById(id);
+        boolean product = productRepository.existsById(String.valueOf(id));
 
         if (!product) {
             throw new ProductNotFoundException("Id", id);
@@ -54,7 +54,7 @@ public class ProductsServiceImpl implements IProductsService {
 
     @Override
     public ProductDTO getProductById(UUID id) {
-        ProductDTO productOptional = ProductMapper.PRODUCT_MAPPER.entityToDto(productRepository.findById(id).get());
+        ProductDTO productOptional = ProductMapper.PRODUCT_MAPPER.entityToDto(productRepository.findById(String.valueOf(id)).get());
 
         if (productOptional == null) {
             throw new ProductNotFoundException("Id", id);
@@ -105,7 +105,7 @@ public class ProductsServiceImpl implements IProductsService {
     public List<ProductDTO> searchProducts(UUID id, String productName, String productNumber, Integer quantity, LocalDateTime expirationDate) {
         List<ProductDTO> products = new ArrayList<>();
         if (id != null) {
-            products.add(ProductMapper.PRODUCT_MAPPER.entityToDto(productRepository.findById(id).get()));
+            products.add(ProductMapper.PRODUCT_MAPPER.entityToDto(productRepository.findById(String.valueOf(id)).get()));
         }
         if (productName != null && !productName.isEmpty()) {
             products.add(ProductMapper.PRODUCT_MAPPER.entityToDto(productRepository.findByProductName(productName)));

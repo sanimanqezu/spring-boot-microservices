@@ -1,0 +1,12 @@
+.alert {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.alert h1 {
+  text-align: center;
+  font-weight: bold;
+}
