@@ -1,8 +1,11 @@
 package za.co.example.core.impl;
 
 import com.example.orders_service.models.OrderDTO;
+import com.example.orders_service.models.OrderItemDTO;
 import com.example.orders_service.models.ProductDTO;
+import com.example.orders_service.models.UserDTO;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 import za.co.example.core.services.IOrdersService;
 import za.co.example.exceptions.OrderNotFoundException;
@@ -10,8 +13,12 @@ import za.co.example.exceptions.OrdersNotFoundException;
 import za.co.example.mappers.OrderMapper;
 import za.co.example.persistance.repositories.OrderRepository;
 import za.co.example.proxy.ProductFeignClient;
+import za.co.example.proxy.UserFeignClient;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -19,33 +26,51 @@ public class OrdersServiceImpl implements IOrdersService {
 
     private final OrderRepository orderRepository;
     private final ProductFeignClient productFeignClient;
+    private final UserFeignClient userFeignClient;
 
-    public OrdersServiceImpl(OrderRepository orderRepository, ProductFeignClient productFeignClient) {
+    public OrdersServiceImpl(OrderRepository orderRepository, ProductFeignClient productFeignClient, UserFeignClient userFeignClient) {
         this.orderRepository = orderRepository;
         this.productFeignClient = productFeignClient;
+        this.userFeignClient = userFeignClient;
     }
 
     @Override
     public void addOrder(OrderDTO orderDTO) {
-        Map<String, Integer> productsToAdd = new HashMap<>();
 
-        if (orderDTO.getProducts() != null) {
-            for (Map.Entry<String, Integer> entry : orderDTO.getProducts().entrySet()) {
-                String productName = entry.getKey();
-                int requestedQuantity = entry.getValue() != null ? entry.getValue() : 1;
+        if (orderDTO.getOrdererIdNo() != null || !orderDTO.getOrdererIdNo().isEmpty()) {
+            UserDTO userDTO = userFeignClient.getUserByRsaId(orderDTO.getOrdererIdNo());
 
-                ProductDTO productDTO = OrderMapper.ORDER_MAPPER
-                        .productToProductDto(productFeignClient.getProduct(productName));
+            if (!userDTO.getRsaId().equals(orderDTO.getOrdererIdNo())) {
+                throw new OrderNotFoundException("Orderer/User does not exist in the system. Verify the Id number or create a user...");
+            }
+        }
+
+        List<OrderItemDTO> orderItemDTOs = new ArrayList<>();
+
+        if (orderDTO.getOrdererIdNo() == null) {
+            throw new OrderNotFoundException("Orderer Id number is required!!");
+        } else if (StringUtils.isEmpty(orderDTO.getOrdererIdNo()) || orderDTO.getOrdererIdNo().length() != 13) {
+            throw new OrderNotFoundException("Orderer Id is invalid. \n Id must be 13 digits");
+        }
+
+        if (orderDTO.getOrderItems() != null) {
+            for (OrderItemDTO orderItemDTO : orderDTO.getOrderItems()) {
+
+                ProductDTO productDTO = productFeignClient.getProduct(orderItemDTO.getProductName());
 
                 if (productDTO != null) {
                     int availableQuantity = productDTO.getQuantity();
+                    int requestedQuantity = orderItemDTO.getQuantity();
                     if (requestedQuantity <= availableQuantity) {
-                        productsToAdd.put(productName, requestedQuantity);
+                        orderItemDTOs.add(orderItemDTO);
+
+                        productDTO.setQuantity(availableQuantity - requestedQuantity);
+                        productFeignClient.updateProduct(productDTO.getId(), productDTO);
                     } else {
-                        throw new OrderNotFoundException("There are " + availableQuantity + " " + productName + " in stock!");
+                        throw new OrderNotFoundException("There are " + availableQuantity + " " + productDTO.getProductName() + " in stock!");
                     }
                 } else {
-                    throw new OrderNotFoundException("The are no products with name {}", productName);
+                    throw new OrderNotFoundException("There are no products with name {}", orderItemDTO.getProductName());
                 }
             }
         }
@@ -57,7 +82,9 @@ public class OrdersServiceImpl implements IOrdersService {
             orderDTO.setOrderNumber(String.valueOf(randomNumber));
         }
 
-        orderDTO.setProducts(productsToAdd);
+        List<OrderItemDTO> orderItems = new ArrayList<>(orderItemDTOs);
+
+        orderDTO.setOrderItems(orderItems);
 
         orderRepository.save(OrderMapper.ORDER_MAPPER.orderDtoToOrder(orderDTO));
     }
@@ -117,26 +144,47 @@ public class OrdersServiceImpl implements IOrdersService {
     }
 
     @Override
-    public List<OrderDTO> getOrderByProductName(String productName) {
-        return OrderMapper.ORDER_MAPPER.orderToOrderDto(orderRepository.findOrdersByProductName(productName));
-    }
-
-    @Override
-    public void updateOrder(UUID id, OrderDTO updatedOrder) {
+    public void updateOrder(UUID id, OrderDTO updatedOrderDTO) {
         OrderDTO existingOrder = getOrderById(id);
-        if (existingOrder != null && updatedOrder != null) {
-            if (updatedOrder.getOrderNumber() != null && !updatedOrder.getOrderNumber().isEmpty())
-                existingOrder.setOrderNumber(updatedOrder.getOrderNumber());
-            if (updatedOrder.getQuantity() != null) existingOrder.setQuantity(updatedOrder.getQuantity());
-            if (updatedOrder.getProducts() != null && !updatedOrder.getProducts().isEmpty())
-                existingOrder.setProducts(updatedOrder.getProducts());
+
+        if (updatedOrderDTO != null) {
+            if (updatedOrderDTO.getOrderNumber() != null && !updatedOrderDTO.getOrderNumber().isEmpty()) {
+                existingOrder.setOrderNumber(updatedOrderDTO.getOrderNumber());
+            }
+
+            if (updatedOrderDTO.getOrdererFullName() != null && !updatedOrderDTO.getOrdererFullName().isEmpty()) {
+                existingOrder.setOrdererFullName(updatedOrderDTO.getOrdererFullName());
+            }
+
+            if (updatedOrderDTO.getOrdererIdNo() != null && !updatedOrderDTO.getOrdererIdNo().isEmpty()) {
+                existingOrder.setOrdererIdNo(updatedOrderDTO.getOrdererIdNo());
+            }
+
+            if (updatedOrderDTO.getOrderItems() != null && !updatedOrderDTO.getOrderItems().isEmpty()) {
+                List<OrderItemDTO> updatedOrderItems = new ArrayList<>();
+                for (OrderItemDTO orderItemDTO : updatedOrderDTO.getOrderItems()) {
+                    ProductDTO productDTO = productFeignClient.getProduct(orderItemDTO.getProductName());
+                    if (productDTO != null) {
+                        int availableQuantity = productDTO.getQuantity();
+                        int requestedQuantity = orderItemDTO.getQuantity();
+                        if (requestedQuantity <= availableQuantity) {
+                            updatedOrderItems.add(orderItemDTO);
+                        } else {
+                            throw new OrderNotFoundException("There are " + availableQuantity + " " + productDTO.getProductName() + " in stock!");
+                        }
+                    } else {
+                        throw new OrderNotFoundException("There are no products with name {}", orderItemDTO.getProductName());
+                    }
+                }
+                existingOrder.setOrderItems(updatedOrderItems);
+            }
+
             orderRepository.save(OrderMapper.ORDER_MAPPER.orderDtoToOrder(existingOrder));
         }
-
     }
 
     @Override
-    public List<OrderDTO> searchOrders(UUID id, String orderNumber, Integer quantity, String product) {
+    public List<OrderDTO> searchOrders(UUID id, String orderNumber, Integer quantity) {
         List<OrderDTO> orders = new ArrayList<>();
         if (id != null) {
             orders.add(OrderMapper.ORDER_MAPPER.orderToOrderDto(orderRepository.findById(String.valueOf(id)).get()));

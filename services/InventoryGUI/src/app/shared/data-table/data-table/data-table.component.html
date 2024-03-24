@@ -18,11 +18,48 @@
       <tr *ngFor="let item of data; let i = index">
         <td>{{ i + 1 }}</td>
         <ng-container *ngFor="let header of headers">
-          <td>{{ item[toCamelCase(header)] }}</td>
+          <td *ngIf="header !== 'Order Items' && header !== 'Address' ">{{ item[toCamelCase(header)] }}</td>
+          <td *ngIf="header === 'Order Items'">
+            <table class="inner-table">
+              <thead>
+              <th>Product Name</th>
+              <th>Quantity</th>
+              </thead>
+              <tbody>
+              <tr *ngFor="let orderItem of item.orderItems">
+                <td>{{ orderItem.productName }}</td>
+                <td>{{ orderItem.quantity }}</td>
+              </tr>
+              </tbody>
+            </table>
+          </td>
+
+          <td *ngIf="header === 'Address'">
+            <table class="inner-table">
+              <thead>
+              <th>House Number</th>
+              <th>Street Name</th>
+              <th>City</th>
+              <th>Zip Code</th>
+              </thead>
+              <tbody>
+              <tr>
+                <td>{{ item.address.houseNumber }}</td>
+                <td>{{ item.address.streetName }}</td>
+                <td>{{ item.address.city }}</td>
+                <td>{{ item.address.zipCode }}</td>
+              </tr>
+              </tbody>
+            </table>
+          </td>
         </ng-container>
         <td>
-          <button class="action-button update-button" (click)="openUpdateModal(item.id)" [disabled]="modalOpened">Update</button>
-          <button class="action-button delete-button" (click)="openConfirmationModal(item.id)" [disabled]="modalOpened">Delete</button>
+          <button class="action-button update-button" (click)="openUpdateModal(item.id)" [disabled]="modalOpened">
+            Update
+          </button>
+          <button class="action-button delete-button" (click)="openConfirmationModal(item.id)" [disabled]="modalOpened">
+            Delete
+          </button>
         </td>
       </tr>
     </ng-container>
@@ -46,11 +83,50 @@
       </div>
       <div class="modal-body">
         <ng-container *ngFor="let field of objectFields">
-          <div class="form-group">
+          <div class="form-group" *ngIf="field.label !== 'Order Items' && field.label !== 'Address' ">
             <label>{{ field.label }}</label>
-            <input type="text" class="form-control" [(ngModel)]="field.value">
+            <input *ngIf="field.label !== 'Expiration Date' && field.label !== 'Date Of Birth'" type="text" class="form-control" [(ngModel)]="field.value">
+            <input *ngIf="field.label === 'Expiration Date'" type="datetime-local" class="form-control" [(ngModel)]="field.value">
+            <input *ngIf="field.label === 'Date Of Birth'" type="date" class="form-control" [(ngModel)]="field.value">
           </div>
         </ng-container>
+
+        <div *ngIf="title.endsWith('Order') ">
+          <h5>Order Items</h5>
+          <div *ngFor="let orderItem of orderItems; let i = index">
+            <div class="form-group">
+              <label>Product Name</label>
+              <input type="text" class="form-control" [(ngModel)]="orderItem.productName">
+            </div>
+            <div class="form-group">
+              <label>Quantity</label>
+              <input type="number" class="form-control" [(ngModel)]="orderItem.quantity">
+            </div>
+            <button type="button" class="btn btn-danger" (click)="removeOrderItem(i)">Remove</button>
+          </div>
+          <button type="button" class="btn btn-primary" (click)="addOrderItem()">Add Order Item</button>
+        </div>
+
+        <div *ngIf="title.endsWith('User')">
+          <h5>Address</h5>
+          <div class="form-group">
+            <label>Street Name</label>
+            <input type="text" class="form-control" [(ngModel)]="userAddress.streetName">
+          </div>
+          <div class="form-group">
+            <label>House Number</label>
+            <input type="text" class="form-control" [(ngModel)]="userAddress.houseNumber">
+          </div>
+          <div class="form-group">
+            <label>City</label>
+            <input type="text" class="form-control" [(ngModel)]="userAddress.city">
+          </div>
+          <div class="form-group">
+            <label>Zip Code</label>
+            <input type="text" class="form-control" [(ngModel)]="userAddress.zipCode">
+          </div>
+        </div>
+
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-primary" *ngIf="!isUpdating" (click)="saveObject()">Save</button>

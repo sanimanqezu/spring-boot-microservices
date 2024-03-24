@@ -1,12 +1,12 @@
 package za.co.example.mappers;
 
 import com.example.orders_service.models.OrderDTO;
-import com.example.orders_service.models.ProductDTO;
+import com.example.orders_service.models.OrderItemDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.factory.Mappers;
 import za.co.example.persistance.entities.Order;
-import za.co.example.persistance.entities.Product;
+import za.co.example.persistance.entities.OrderItem;
 
 import java.util.List;
 
@@ -21,6 +21,8 @@ public interface OrderMapper {
 
     List<OrderDTO> orderToOrderDto(List<Order> order);
 
-    ProductDTO productToProductDto(Product product);
+    OrderItemDTO orderItemToOrderItemDto(OrderItem orderItem);
+
+    OrderItem orderItemDtoToOrderItem(OrderItemDTO orderItemDTO);
 
 }

@@ -11,7 +11,7 @@ public interface ProductRepository extends JpaRepository<Product, String> {
 
     Product findByProductName(String productName);
 
-    List<Product> findByProductNumber(String productNumber);
+    Product findByProductNumber(String productNumber);
 
     List<Product> findByExpirationDate(LocalDateTime expirationDate);
 

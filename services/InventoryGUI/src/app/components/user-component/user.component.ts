@@ -1,5 +1,5 @@
-import {Component, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {RouterOutlet} from '@angular/router';
 import {SidebarComponent} from "../../shared/sidebar/sidebar.component";
 import {DataTableComponent} from "../../shared/data-table/data-table/data-table.component";
 import {Subscription} from "rxjs";
@@ -7,6 +7,7 @@ import {UserService} from "../../services/user-service/user.service";
 import {User} from "../../modules/user.module";
 import {AlertComponent} from "../../shared/alert/alert.component";
 import {NgIf} from "@angular/common";
+import moment from 'moment';
 
 @Component({
   selector: 'app-root',
@@ -36,8 +37,11 @@ export class UserComponent implements OnInit, OnDestroy {
   getAllUsers() {
     this.userSubscription = this.userService.getAllUsers()
       .subscribe(
-        response => {
-          this.myData = response;
+        (response: any[]) => {
+          this.myData = response.map(user => ({
+            ...user,
+            dateOfBirth: this.formatExpirationDate(user.dateOfBirth)
+          }));
           console.log("All users: ", this.myData);
         },
         error => {
@@ -47,10 +51,20 @@ export class UserComponent implements OnInit, OnDestroy {
       );
   }
 
+  formatExpirationDate(expirationDate: number[]): string {
+    const [year, month, day] = expirationDate;
+
+    let formattedDate = new Date(year, month - 1, day);
+
+    return formattedDate.toLocaleDateString();
+  }
+
   handleSave(newObject: any) {
+    newObject.dateOfBirth = moment(newObject.dateOfBirth, "YYYY-MM-DD");
     this.userService.addUser(newObject)
       .subscribe(
         response => {
+          this.getAllUsers();
           console.log("Post response: ", response)
           console.log("All users after post request: ", this.myData)
         },
@@ -62,6 +76,7 @@ export class UserComponent implements OnInit, OnDestroy {
   }
 
   handleUpdate(selectedObject: any) {
+    selectedObject.dateOfBirth = moment(selectedObject.dateOfBirth, "YYYY-MM-DD");
     const objectId = selectedObject.id;
     this.userService.updateUser(objectId, selectedObject)
       .subscribe(

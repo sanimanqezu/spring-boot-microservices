@@ -1,6 +1,8 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {NgForOf, NgIf} from "@angular/common";
+import {DatePipe, formatDate, NgForOf, NgIf} from "@angular/common";
 import {FormsModule} from "@angular/forms";
+import {OrderItem} from "../../../modules/OrderItem.module";
+import {Address} from "../../../modules/address.module";
 
 @Component({
   selector: 'app-data-table',
@@ -8,7 +10,8 @@ import {FormsModule} from "@angular/forms";
   imports: [
     NgIf,
     NgForOf,
-    FormsModule
+    FormsModule,
+    DatePipe
   ],
   templateUrl: './data-table.component.html',
   styleUrl: './data-table.component.css'
@@ -28,6 +31,8 @@ export class DataTableComponent {
   showConfirmationModal: any;
   modalOpened!: boolean;
   isUpdating!: boolean;
+  orderItems: OrderItem[] = [];
+  userAddress: Address = { id: '', city: '', streetName: '', houseNumber: '', zipCode: '' };
 
   toCamelCase(str: string): string {
     return str.replace(/(?:^\w|[A-Z]|\b\w)/g, (word, index) => {
@@ -41,6 +46,8 @@ export class DataTableComponent {
     this.title = 'Add ' + this.title;
     this.selectedItemId = null;
     this.showModal = true;
+    this.orderItems = [];
+    this.userAddress = { id: '', city: '', streetName: '', houseNumber: '', zipCode: '' };
   }
 
   openUpdateModal(id: any) {
@@ -53,6 +60,10 @@ export class DataTableComponent {
         label: header,
         value: selectedItem[this.toCamelCase(header)] || ''
       }));
+
+      this.orderItems = selectedItem.orderItems || [];
+      this.userAddress = selectedItem.address || { streetName: '', houseNumber: '', city: '', zipCode: '' };
+
       this.selectedItemId = id;
       this.showModal = true;
     }
@@ -69,18 +80,55 @@ export class DataTableComponent {
     this.objectFields.forEach(field => {
       newObject[this.toCamelCase(field.label)] = field.value;
     });
-    this.data.push(newObject);
+
+    if (this.title.endsWith('User')) {
+      newObject.address = {
+        city: this.userAddress.city,
+        streetName: this.userAddress.streetName,
+        houseNumber: this.userAddress.houseNumber,
+        zipCode: this.userAddress.zipCode
+      };
+    }
+
+    if (this.title.endsWith('Order')) {
+      newObject.orderItems = this.orderItems.map(orderItem => ({
+        productName: orderItem.productName,
+        quantity: orderItem.quantity
+      }));
+    }
+
+    console.log("New object: ", newObject)
     this.saveObjectEvent.emit(newObject);
     this.closeModal();
   }
 
   updateObject() {
-    const selectedItem = this.data.find((item:any) => item.id === this.selectedItemId);
+    const selectedItem = this.data.find((item: any) => item.id === this.selectedItemId);
     if (selectedItem) {
       this.objectFields.forEach(field => {
-        selectedItem[this.toCamelCase(field.label)] = field.value;
-        this.updateObjectEvent.emit(selectedItem);
+        if (field.label !== 'Order Items' && field.label !== 'Address') {
+          selectedItem[this.toCamelCase(field.label)] = field.value;
+        }
       });
+
+      if (this.title.endsWith('Order')) {
+        selectedItem.orderItems = this.orderItems.map(orderItem => ({
+          productName: orderItem.productName,
+          quantity: orderItem.quantity
+        }));
+      }
+
+      if (this.title.endsWith('User')) {
+        selectedItem.address = {
+          city: this.userAddress.city,
+          streetName: this.userAddress.streetName,
+          houseNumber: this.userAddress.houseNumber,
+          zipCode: this.userAddress.zipCode
+        };
+      }
+
+      console.log("New object: ", selectedItem)
+      this.updateObjectEvent.emit(selectedItem);
     }
     this.closeModal();
   }
@@ -109,5 +157,33 @@ export class DataTableComponent {
     this.modalOpened = false;
     this.showConfirmationModal = false;
 
+  }
+
+  addOrderItem() {
+    this.orderItems.push({ productName: '', quantity: 1 });
+  }
+
+  removeOrderItem(index: number) {
+    this.orderItems.splice(index, 1);
+  }
+
+  formatDate(expirationDate: number[]): string {
+    const [year, month, day, hours, minutes, seconds] = expirationDate;
+
+    let formattedDate = new Date(year, month - 1, day);
+
+    if (!isNaN(hours)) {
+      formattedDate.setHours(hours);
+    }
+
+    if (!isNaN(minutes)) {
+      formattedDate.setMinutes(minutes);
+    }
+
+    if (!isNaN(seconds)) {
+      formattedDate.setSeconds(seconds);
+    }
+
+    return formattedDate.toLocaleString();
   }
 }
