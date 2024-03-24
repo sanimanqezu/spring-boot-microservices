@@ -291,6 +291,10 @@ components:
     UserDTO:
       type: object
       properties:
+        id:
+          type: string
+          format: uuid
+          required: false
         firstName:
           type: string
         lastName:
@@ -306,6 +310,10 @@ components:
     AddressDTO:
       type: object
       properties:
+        id:
+          type: string
+          format: uuid
+          required: false
         city:
           type: string
         streetName:

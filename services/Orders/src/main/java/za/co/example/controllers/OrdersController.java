@@ -54,11 +54,6 @@ public class OrdersController implements OrdersApi{
     }
 
     @Override
-    public ResponseEntity<List<OrderDTO>> getOrderByProductName(String productName) {
-        return ResponseEntity.ok(ordersService.getOrderByProductName(productName));
-    }
-
-    @Override
     public ResponseEntity<List<OrderDTO>> getOrderByQuantity(Integer quantity) {
         logger.info("Retrieving order(s) by quantity: {}", quantity);
         return ResponseEntity.ok(ordersService.getOrdersByQuality(quantity));
@@ -79,9 +74,9 @@ public class OrdersController implements OrdersApi{
     }
 
     @Override
-    public ResponseEntity<List<OrderDTO>> searchOrders(UUID id, String orderNumber, Integer quantity, String product) {
-        logger.info("Searching user(s) by the following properties: \n Id: {} \n Order Number: {} \n Quantity: {} \n Product: {} ",
-                id, orderNumber, quantity, product);
-        return ResponseEntity.ok(ordersService.searchOrders(id, orderNumber, quantity, product));
+    public ResponseEntity<List<OrderDTO>> searchOrders(UUID id, String orderNumber, Integer quantity) {
+        logger.info("Searching user(s) by the following properties: \n Id: {} \n Order Number: {} \n Quantity: {}",
+                id, orderNumber, quantity);
+        return ResponseEntity.ok(ordersService.searchOrders(id, orderNumber, quantity));
     }
 }

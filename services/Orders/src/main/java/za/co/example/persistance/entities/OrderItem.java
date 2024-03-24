@@ -5,13 +5,11 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 
-import java.time.LocalDateTime;
-
-@Getter
 @Setter
+@Getter
 @Entity
-@Table(name = "product")
-public class Product {
+@Table(name = "order_item")
+public class OrderItem {
 
     @Id
     @GeneratedValue(generator = "UUID")
@@ -25,12 +23,6 @@ public class Product {
     @Column(name = "product_name")
     private String productName;
 
-    @Column(name = "product_number")
-    private String productNumber;
-
-    @Column(name = "product_quantity")
+    @Column(name = "quantity")
     private Integer quantity;
-
-    @Column(name = "expiration_date")
-    private LocalDateTime expirationDate;
 }

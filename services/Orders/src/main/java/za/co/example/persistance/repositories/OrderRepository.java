@@ -15,7 +15,4 @@ public interface OrderRepository extends JpaRepository<Order, String> {
     List<Order> findByQuantity(Integer quantity);
 
     Order findByOrdererIdNo(String ordererIdNo);
-
-    @Query("SELECT DISTINCT o FROM Order o JOIN o.products p WHERE KEY(p) = :productName ORDER BY o.id")
-    List<Order> findOrdersByProductName(@Param("productName") String productName);
 }

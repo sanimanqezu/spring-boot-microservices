@@ -16,9 +16,9 @@ public interface IProductsService {
 
     ProductDTO getProductById(UUID id);
 
-    ProductDTO getProductsByName(String productName);
+    ProductDTO getProductByName(String productName);
 
-    List<ProductDTO> getProductsByNumber(String productNumber);
+    ProductDTO getProductByNumber(String productNumber);
 
     List<ProductDTO> getProductsByExpirationDate(LocalDateTime expirationDate);
 

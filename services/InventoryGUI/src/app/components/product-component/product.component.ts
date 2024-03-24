@@ -36,8 +36,11 @@ export class ProductComponent implements OnInit, OnDestroy {
   getAllProducts() {
     this.productSubscription = this.productService.getAllProducts()
       .subscribe(
-        response => {
-          this.myData = response;
+        (response: any[]) => {
+          this.myData = response.map(product => ({
+            ...product,
+            expirationDate: this.formatExpirationDate(product.expirationDate)
+          }));
           console.log("All products: ", this.myData);
         },
         error => {
@@ -47,10 +50,23 @@ export class ProductComponent implements OnInit, OnDestroy {
       );
   }
 
+  formatExpirationDate(expirationDate: number[]): string {
+    const [year, month, day, hours, minutes, seconds] = expirationDate;
+
+    let formattedDate = new Date(year, month - 1, day, hours, minutes);
+
+    if (!isNaN(seconds)) {
+      formattedDate.setSeconds(seconds);
+    }
+
+    return formattedDate.toLocaleString();
+  }
+
   handleSave(newObject: any) {
     this.productService.addProduct(newObject)
       .subscribe(
         response => {
+          this.getAllProducts();
           console.log("Post response: ", response)
           console.log("All products after post request: ", this.myData)
         },

@@ -53,13 +53,13 @@ public class ProductsController implements ProductsApi{
     @Override
     public ResponseEntity<ProductDTO> getProductByName(String productName) {
         logger.info("Retrieving product(s) by product name: {}", productName);
-        return ResponseEntity.ok(productsService.getProductsByName(productName));
+        return ResponseEntity.ok(productsService.getProductByName(productName));
     }
 
     @Override
-    public ResponseEntity<List<ProductDTO>> getProductsByNumber(String productNumber) {
+    public ResponseEntity<ProductDTO> getProductByNumber(String productNumber) {
         logger.info("Retrieving product(s) by product number: {}", productNumber);
-        return ResponseEntity.ok(productsService.getProductsByNumber(productNumber));
+        return ResponseEntity.ok(productsService.getProductByNumber(productNumber));
     }
 
     @Override

@@ -21,9 +21,7 @@ public interface IOrdersService {
 
     OrderDTO getOrderByOrdererIdNo(String ordererIdNo);
 
-    List<OrderDTO> getOrderByProductName(String productName);
-
     void updateOrder(UUID id, OrderDTO updatedOrder);
 
-    List<OrderDTO> searchOrders(UUID id, String orderNumber, Integer quality, String product);
+    List<OrderDTO> searchOrders(UUID id, String orderNumber, Integer quality);
 }
