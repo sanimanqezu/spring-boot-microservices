@@ -137,6 +137,7 @@
                             <configOptions>
                                 <interfaceOnly>true</interfaceOnly>
                                 <dateLibrary>java8-localdatetime</dateLibrary>
+<!--                                <dateLibrary>java8-localdate</dateLibrary>-->
                             </configOptions>
                         </configuration>
                     </execution>

@@ -38,26 +38,16 @@ public class UsersServiceImpl implements IUsersService {
             throw new UserNotFoundException("RSA Id must have 13 digits");
         }
 
-        AddressDTO existingAddress = UserMapper.USER_MAPPER.addressToAddressDTO(
-                addressFeignClient.getAddress(
+        AddressDTO existingAddress = addressFeignClient.getAddress(
                 addressDTO.getCity(),
                 addressDTO.getStreetName(),
                 addressDTO.getHouseNumber(),
-                addressDTO.getZipCode()));
+                addressDTO.getZipCode());
 
         if (existingAddress == null) {
-            userDTO.setAddress(
-                    UserMapper.USER_MAPPER.addressToAddressDTO(
-                            addressFeignClient.saveAddress(
-                                    UserMapper.USER_MAPPER.addressDtoToAddress(addressDTO))
-                    )
-            );
-        } else {
-            userDTO.setAddress(existingAddress);
+            addressFeignClient.saveAddress(addressDTO);
         }
 
-        log.info("User dto date of birth type: " + userDTO.getDateOfBirth().getClass().getSimpleName());
-        log.info("User dto date of birth type: " + UserMapper.USER_MAPPER.userDTOToUser(userDTO).getDateOfBirth().getClass().getSimpleName());
         userRepository.save(UserMapper.USER_MAPPER.userDTOToUser(userDTO));
     }
 

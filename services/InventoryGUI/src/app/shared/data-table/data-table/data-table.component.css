@@ -182,3 +182,12 @@
 .btn-danger:hover {
   background-color: #c62828;
 }
+
+.inner-table {
+  width: 100% !important;
+}
+
+.modal-body {
+  max-height: 400px;
+  overflow-y: auto;
+}

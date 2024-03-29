@@ -20,7 +20,7 @@ export class OrderComponent implements OnInit, OnDestroy{
 
   @ViewChild(DataTableComponent) dataTableComponent!: DataTableComponent;
   title: string = 'Order';
-  headers: string[] = ['Order Number', 'Quantity', 'Products', 'Orderer Full Name', 'Orderer Id No'];
+  headers: string[] = ['Order Number', 'Quantity', 'Orderer Full Name', 'Orderer Id No', 'Order Items'];
   myData: Order[] = [];
   orderSubscription: Subscription | undefined;
   dataTableObjectFields!: { label: string; value: string }[];
@@ -48,11 +48,18 @@ export class OrderComponent implements OnInit, OnDestroy{
   }
 
   handleSave(newObject: any) {
+
+    if (newObject.ordererIdNo.length != 13) {
+      this.errorMessage = "Orderer Id Number is not valid. \n Id number must be 13 digits";
+      return;
+    }
+
     this.orderService.addOrder(newObject)
       .subscribe(
         response => {
           console.log("Post response: ", response)
           console.log("All orders after post request: ", this.myData)
+          this.getAllOrders();
         },
         error => {
           console.error("Error adding order:", error.error);
@@ -62,6 +69,12 @@ export class OrderComponent implements OnInit, OnDestroy{
   }
 
   handleUpdate(selectedObject: any) {
+
+    if (selectedObject.ordererIdNo.length != 13) {
+      this.errorMessage = "Orderer Id Number is not valid. \n Id number must be 13 digits";
+      return;
+    }
+
     const objectId = selectedObject.id;
     this.orderService.updateOrder(objectId, selectedObject)
       .subscribe(

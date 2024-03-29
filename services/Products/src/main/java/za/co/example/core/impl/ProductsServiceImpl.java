@@ -1,6 +1,7 @@
 package za.co.example.core.impl;
 
 import com.example.products_service.models.ProductDTO;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import za.co.example.core.services.IProductsService;
 import za.co.example.exceptions.ProductNotFoundException;
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 public class ProductsServiceImpl implements IProductsService {
 
@@ -63,21 +65,22 @@ public class ProductsServiceImpl implements IProductsService {
     }
 
     @Override
-    public ProductDTO getProductsByName(String productName) {
-        ProductDTO products = ProductMapper.PRODUCT_MAPPER.entityToDto(productRepository.findByProductName(productName));
-        if (products == null) {
+    public ProductDTO getProductByName(String productName) {
+        ProductDTO product = ProductMapper.PRODUCT_MAPPER.entityToDto(productRepository.findByProductName(productName));
+        if (product == null) {
             throw new ProductsNotFoundException("Product Name", productName);
         }
-        return products;
+        log.info("Product: " + product);
+        return product;
     }
 
     @Override
-    public List<ProductDTO> getProductsByNumber(String productNumber) {
-        List<ProductDTO> products = ProductMapper.PRODUCT_MAPPER.entityToDto(productRepository.findByProductNumber(productNumber));
-        if (products == null || products.isEmpty()) {
+    public ProductDTO getProductByNumber(String productNumber) {
+        ProductDTO product = ProductMapper.PRODUCT_MAPPER.entityToDto(productRepository.findByProductNumber(productNumber));
+        if (product == null) {
             throw new ProductsNotFoundException("Product Number", productNumber);
         }
-        return products;
+        return product;
     }
 
     @Override
@@ -111,7 +114,7 @@ public class ProductsServiceImpl implements IProductsService {
             products.add(ProductMapper.PRODUCT_MAPPER.entityToDto(productRepository.findByProductName(productName)));
         }
         if (productNumber != null && !productNumber.isEmpty()) {
-            products.addAll(ProductMapper.PRODUCT_MAPPER.entityToDto(productRepository.findByProductNumber(productNumber)));
+            products.add(ProductMapper.PRODUCT_MAPPER.entityToDto(productRepository.findByProductNumber(productNumber)));
         }
         if (quantity != null) {
             products.addAll(ProductMapper.PRODUCT_MAPPER.entityToDto(productRepository.findByQuantity(quantity)));

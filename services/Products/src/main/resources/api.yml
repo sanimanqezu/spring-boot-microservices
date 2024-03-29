@@ -59,7 +59,7 @@ paths:
   /products/productNumber:
     get:
       summary: Retrieve product(s) by product number
-      operationId: getProductsByNumber
+      operationId: getProductByNumber
       parameters:
         - name: productNumber
           in: query
@@ -73,8 +73,6 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
                   $ref: '#/components/schemas/ProductDTO'
         '404':
           description: Product not found
@@ -242,6 +240,10 @@ components:
     ProductDTO:
       type: object
       properties:
+        id:
+          type: string
+          format: uuid
+          required: false
         productName:
           type: string
         productNumber:
