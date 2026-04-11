@@ -41,21 +41,19 @@ public class OrdersServiceImpl implements IOrdersService {
     @Override
     public void addOrder(OrderDTO orderDTO) {
 
-        if (orderDTO.getOrdererIdNo() != null && !orderDTO.getOrdererIdNo().isEmpty()) {
-            UserDTO userDTO = userFeignClient.getUserByRsaId(orderDTO.getOrdererIdNo());
-
-            if (!userDTO.getRsaId().equals(orderDTO.getOrdererIdNo())) {
-                throw new OrderNotFoundException("Orderer/User does not exist in the system. Verify the Id number or create a user...");
-            }
-        }
-
-        List<OrderItemDTO> orderItemDTOs = new ArrayList<>();
-
         if (orderDTO.getOrdererIdNo() == null) {
             throw new OrderNotFoundException("Orderer Id number is required!!");
         } else if (StringUtils.isEmpty(orderDTO.getOrdererIdNo()) || orderDTO.getOrdererIdNo().length() != 13) {
             throw new OrderNotFoundException("Orderer Id is invalid. \n Id must be 13 digits");
         }
+
+        UserDTO userDTO = userFeignClient.getUserByRsaId(orderDTO.getOrdererIdNo());
+
+        if (userDTO == null || !userDTO.getRsaId().equals(orderDTO.getOrdererIdNo())) {
+            throw new OrderNotFoundException("Orderer/User does not exist in the system. Verify the Id number or create a user...");
+        }
+
+        List<OrderItemDTO> orderItemDTOs = new ArrayList<>();
 
         if (orderDTO.getOrderItems() != null) {
             for (OrderItemDTO orderItemDTO : orderDTO.getOrderItems()) {
