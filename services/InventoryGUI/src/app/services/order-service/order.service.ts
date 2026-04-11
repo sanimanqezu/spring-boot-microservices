@@ -1,43 +1,29 @@
-import {Injectable} from '@angular/core';
-import {RequestService} from "../request-service/request.service";
-import {map, Observable} from "rxjs";
-import {Order} from "../../modules/order.module";
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { RequestService } from '../request-service/request.service';
+import { Order } from '../../modules/order.module';
+import { environment } from '../../../environments/environment';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class OrderService {
 
-  baseUrl = "http://localhost:7002/order-service/orders"
+  private readonly baseUrl = `${environment.apiUrl}/order-service/orders`;
 
-  constructor(private requestService: RequestService) { }
+  constructor(private requestService: RequestService) {}
 
-  addOrder(body: Order) {
-    const url = this.baseUrl;
-    return this.requestService.postForObject<Order>(url, body)
-      .pipe(
-        map((response: Order) => response)
-      );
+  addOrder(body: Order): Observable<void> {
+    return this.requestService.postForObject<void>(this.baseUrl, body);
   }
 
   getAllOrders(): Observable<Order[]> {
-    const url = this.baseUrl;
-    return this.requestService.getForObject<Order[]>(url)
-      .pipe(
-        map((response: Order[]) => response)
-      );
+    return this.requestService.getForObject<Order[]>(this.baseUrl);
   }
 
-  updateOrder(id: string, body: Order): Observable<Order[]> {
-    const url = `${this.baseUrl}/id?id=${id}`;
-    return this.requestService.putForObject<Order[]>(url, body);
+  updateOrder(id: string, body: Order): Observable<void> {
+    return this.requestService.putForObject<void>(`${this.baseUrl}/id?id=${id}`, body);
   }
 
-  deleteOrder(id: string): Observable<Order[]> {
-    const url = `${this.baseUrl}/id?id=${id}`;
-    return this.requestService.deleteForObject<Order[]>(url)
-      .pipe(
-        map((response: Order[]) => response)
-      );
+  deleteOrder(id: string): Observable<void> {
+    return this.requestService.deleteForObject<void>(`${this.baseUrl}/id?id=${id}`);
   }
 }

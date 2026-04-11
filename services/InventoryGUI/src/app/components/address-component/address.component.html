@@ -1,15 +1,13 @@
 <div class="container">
-  <app-alert *ngIf="errorMessage" [message]="errorMessage"></app-alert>
+  <app-alert *ngIf="alertMessage" [message]="alertMessage" [type]="alertType"></app-alert>
   <h1>{{ title }} Management</h1>
   <app-data-table
     [data]="myData"
     [title]="title"
-    [objectFields]="dataTableObjectFields"
-    [showModal]="dataTableShowModal"
     [headers]="headers"
+    [isLoading]="isLoading"
     (saveObjectEvent)="handleSave($event)"
     (updateObjectEvent)="handleUpdate($event)"
     (deleteObjectEvent)="handleDelete($event)"
-  >
-  </app-data-table>
+  ></app-data-table>
 </div>

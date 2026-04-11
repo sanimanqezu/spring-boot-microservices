@@ -1,3 +1,4 @@
-<div *ngIf="show" class="alert alert-danger">
-  <h1>{{ message }}</h1>
+<div *ngIf="show" class="alert" [ngClass]="'alert-' + type" role="alert">
+  <span class="alert-message">{{ message }}</span>
+  <button class="alert-close" (click)="dismiss()" aria-label="Dismiss">&times;</button>
 </div>

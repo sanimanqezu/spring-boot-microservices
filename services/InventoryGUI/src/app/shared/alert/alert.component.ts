@@ -1,23 +1,35 @@
-import {Component, Input, OnInit} from '@angular/core';
-import {NgIf} from "@angular/common";
+import { Component, Input, OnChanges } from '@angular/core';
+import { NgIf, NgClass } from '@angular/common';
 
 @Component({
   selector: 'app-alert',
   standalone: true,
-  imports: [
-    NgIf
-  ],
+  imports: [NgIf, NgClass],
   templateUrl: './alert.component.html',
   styleUrl: './alert.component.css'
 })
-export class AlertComponent implements OnInit {
+export class AlertComponent implements OnChanges {
   @Input() message: string = '';
-  show: boolean = false;
+  @Input() type: 'success' | 'error' | 'warning' | 'info' = 'error';
 
-  ngOnInit() {
-    this.show = true;
-    setTimeout(() => {
+  show: boolean = false;
+  private dismissTimer: ReturnType<typeof setTimeout> | null = null;
+
+  ngOnChanges(): void {
+    if (this.message) {
+      this.show = true;
+      if (this.dismissTimer) {
+        clearTimeout(this.dismissTimer);
+      }
+      this.dismissTimer = setTimeout(() => {
+        this.show = false;
+      }, 4000);
+    } else {
       this.show = false;
-    }, 3000); // 3 seconds
+    }
+  }
+
+  dismiss(): void {
+    this.show = false;
   }
 }

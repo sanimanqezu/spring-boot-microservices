@@ -1,44 +1,29 @@
-import {Injectable} from '@angular/core';
-import {RequestService} from "../request-service/request.service";
-import {map, Observable} from "rxjs";
-import {Product} from "../../modules/product.module";
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { RequestService } from '../request-service/request.service';
+import { Product } from '../../modules/product.module';
+import { environment } from '../../../environments/environment';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class ProductService {
 
-  baseUrl = "http://localhost:7002/product-service/products"
+  private readonly baseUrl = `${environment.apiUrl}/product-service/products`;
 
-  constructor(private requestService: RequestService) { }
+  constructor(private requestService: RequestService) {}
 
   addProduct(body: Product): Observable<Product> {
-    console.log("Body: ", body)
-    const url = this.baseUrl;
-    return this.requestService.postForObject<Product>(url, body)
-      .pipe(
-        map((response: Product) => response)
-      );
+    return this.requestService.postForObject<Product>(this.baseUrl, body);
   }
 
   getAllProducts(): Observable<Product[]> {
-    const url = this.baseUrl;
-    return this.requestService.getForObject<Product[]>(url)
-      .pipe(
-        map((response: Product[]) => response)
-      );
+    return this.requestService.getForObject<Product[]>(this.baseUrl);
   }
 
-  updateProduct(id: string, body: Product): Observable<Product[]> {
-    const url = `${this.baseUrl}/id?id=${id}`;
-    return this.requestService.putForObject<Product[]>(url, body);
+  updateProduct(id: string, body: Product): Observable<void> {
+    return this.requestService.putForObject<void>(`${this.baseUrl}/id?id=${id}`, body);
   }
 
-  deleteProduct(id: string): Observable<Product[]> {
-    const url = `${this.baseUrl}/id?id=${id}`;
-    return this.requestService.deleteForObject<Product[]>(url)
-      .pipe(
-        map((response: Product[]) => response)
-      );
+  deleteProduct(id: string): Observable<void> {
+    return this.requestService.deleteForObject<void>(`${this.baseUrl}/id?id=${id}`);
   }
 }

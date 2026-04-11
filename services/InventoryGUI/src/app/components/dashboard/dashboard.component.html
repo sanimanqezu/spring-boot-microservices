@@ -1,29 +1,40 @@
 <div class="dashboard">
   <div class="container">
     <h1>Welcome to Manqezu Inventory Dashboard</h1>
-    <div class="card">
-      <h2>Statistics</h2>
-      <ul>
-        <li>Total Users: <strong>{{ users }}</strong></li>
-        <li>Total Products: <strong>{{ products }}</strong></li>
-        <li>Total Orders: <strong>{{ orders }}</strong></li>
-      </ul>
+
+    <div *ngIf="isLoading" class="card loading-card">
+      <p>Loading statistics...</p>
     </div>
-    <div class="card">
-      <h2>Recent Activity</h2>
-      <ul>
-        <li>User registration on 2024-03-10</li>
-        <li>New product added on 2024-03-08</li>
-        <li>Order #123 placed on 2024-03-05</li>
-      </ul>
+
+    <div *ngIf="loadError && !isLoading" class="card error-card">
+      <p>Could not load statistics. Ensure all backend services are running.</p>
+      <button class="retry-btn" (click)="loadStats()">Retry</button>
     </div>
-    <div class="card">
-      <h2>Quick Links</h2>
-      <ul>
-        <li><a routerLink="/user">Manage Users</a></li>
-        <li><a routerLink="/product">Manage Products</a></li>
-        <li><a routerLink="/order">Manage Orders</a></li>
-      </ul>
+
+    <div *ngIf="!isLoading && !loadError" class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-icon"><i class="fas fa-users"></i></span>
+        <span class="stat-number">{{ userCount }}</span>
+        <span class="stat-label">Total Users</span>
+        <a routerLink="/user" class="stat-link">Manage Users</a>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon"><i class="fas fa-box"></i></span>
+        <span class="stat-number">{{ productCount }}</span>
+        <span class="stat-label">Total Products</span>
+        <a routerLink="/product" class="stat-link">Manage Products</a>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon"><i class="fas fa-shopping-cart"></i></span>
+        <span class="stat-number">{{ orderCount }}</span>
+        <span class="stat-label">Total Orders</span>
+        <a routerLink="/order" class="stat-link">Manage Orders</a>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon"><i class="fas fa-map-marker-alt"></i></span>
+        <span class="stat-label">Addresses</span>
+        <a routerLink="/address" class="stat-link">Manage Addresses</a>
+      </div>
     </div>
   </div>
 </div>

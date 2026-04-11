@@ -6,8 +6,7 @@
   left: 0;
   background-color: #2639b7;
   padding-top: 20px;
-  transition: width 0.3s ease;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
 }
 
 .sidebar h1 {
@@ -16,13 +15,13 @@
   text-align: center;
   letter-spacing: 2px;
   margin-bottom: 20px;
+  transition: 0.3s;
 }
 
 .sidebar h1:hover {
   font-size: 26px;
   color: #ff6b6b;
   letter-spacing: 4px;
-  transition: .3s;
 }
 
 .sidebar h1 span {
@@ -38,21 +37,26 @@
   align-items: center;
   padding: 12px 20px;
   text-decoration: none;
-  color: white;
-  transition: background-color 0.3s ease, padding-left 0.3s ease;
+  color: rgba(255, 255, 255, 0.8);
+  transition: background-color 0.2s ease, padding-left 0.2s ease;
+  border-left: 3px solid transparent;
 }
 
 .sidebar a:hover {
-  padding-left: 40px;
-  background-color: #6399c7;
+  padding-left: 28px;
+  background-color: rgba(255, 255, 255, 0.12);
+  color: white;
+}
+
+.sidebar a.active {
+  background-color: rgba(255, 255, 255, 0.18);
+  border-left-color: #ff6b6b;
+  color: white;
+  font-weight: 600;
 }
 
 .icon {
-  margin-right: 15px;
-}
-
-.fa {
-  font-size: 24px;
-  width: 30px;
+  margin-right: 10px;
+  width: 18px;
   text-align: center;
 }

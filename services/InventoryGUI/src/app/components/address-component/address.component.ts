@@ -1,100 +1,96 @@
-import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import {SidebarComponent} from "../../shared/sidebar/sidebar.component";
-import {DataTableComponent} from "../../shared/data-table/data-table/data-table.component";
-import {AddressService} from "../../services/address-service/address.service";
-import {Subscription} from "rxjs";
-import {Address} from "../../modules/address.module";
-import {AlertComponent} from "../../shared/alert/alert.component";
-import {NgIf} from "@angular/common";
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { NgIf } from '@angular/common';
+import { Subscription } from 'rxjs';
+import { DataTableComponent } from '../../shared/data-table/data-table/data-table.component';
+import { AlertComponent } from '../../shared/alert/alert.component';
+import { AddressService } from '../../services/address-service/address.service';
+import { Address } from '../../modules/address.module';
 
 @Component({
-  selector: 'app-root',
+  selector: 'app-address',
   standalone: true,
-  imports: [RouterOutlet, SidebarComponent, DataTableComponent, AlertComponent, NgIf],
+  imports: [DataTableComponent, AlertComponent, NgIf],
   templateUrl: './address.component.html',
-  styleUrl: './address.component.css',
-  providers: [AddressService]
+  styleUrl: './address.component.css'
 })
-
 export class AddressComponent implements OnInit, OnDestroy {
-
-  @ViewChild(DataTableComponent) dataTableComponent!: DataTableComponent;
-  title: string = 'Address';
-  headers: string[] = ['House Number', 'Street Name', 'City', 'Zip Code'];
+  title = 'Address';
+  headers = ['House Number', 'Street Name', 'City', 'Zip Code'];
   myData: Address[] = [];
-  addressSubscription: Subscription | undefined;
-  dataTableObjectFields!: { label: string; value: string }[];
-  dataTableShowModal: boolean = false;
-  errorMessage: string = '';
+  isLoading = false;
+
+  alertMessage = '';
+  alertType: 'success' | 'error' | 'warning' | 'info' = 'error';
+
+  private sub?: Subscription;
 
   constructor(private addressService: AddressService) {}
 
-  ngOnInit() {
-    this.getAllAddresses();
+  ngOnInit(): void {
+    this.loadAddresses();
   }
 
-  getAllAddresses() {
-    this.addressSubscription = this.addressService.getAllAddresses()
-      .subscribe(
-        response => {
-          this.myData = response;
-          console.log("All addresses: ", this.myData);
-        },
-        error => {
-          console.error("Error retrieving addresses:", error.error);
-          this.errorMessage = "Failed to retrieve addresses. Please try again later.";
-        }
-      );
+  loadAddresses(): void {
+    this.isLoading = true;
+    this.sub = this.addressService.getAllAddresses().subscribe({
+      next: (addresses) => {
+        this.myData = addresses;
+        this.isLoading = false;
+      },
+      error: () => {
+        this.isLoading = false;
+      }
+    });
   }
 
-  handleSave(newObject: any) {
-    this.addressService.addAddress(newObject)
-      .subscribe(
-        response => {
-          console.log("Post response: ", response)
-          console.log("All addresses after post request: ", this.myData)
-        },
-        error => {
-          console.error("Error adding address:", error.error);
-          this.errorMessage = "Failed to add address. Please try again later.";
-        }
-      );
+  handleSave(newObject: any): void {
+    this.isLoading = true;
+    this.addressService.addAddress(newObject as unknown as Address).subscribe({
+      next: () => {
+        this.showAlert('Address added successfully.', 'success');
+        this.loadAddresses();
+      },
+      error: () => {
+        this.isLoading = false;
+      }
+    });
   }
 
-  handleUpdate(selectedObject: any) {
-    const objectId = selectedObject.id;
-    this.addressService.updateAddress(objectId, selectedObject)
-      .subscribe(
-        response => {
-          console.log('Address updated successfully:', response);
-          this.getAllAddresses();
-        },
-        error => {
-          console.error('Error updating address:', error.error);
-          this.errorMessage = "Failed to update address. Please try again later.";
-        }
-      );
+  handleUpdate(selectedObject: any): void {
+    const id = selectedObject['id'] as string;
+    this.isLoading = true;
+    this.addressService.updateAddress(id, selectedObject as unknown as Address).subscribe({
+      next: () => {
+        this.showAlert('Address updated successfully.', 'success');
+        this.loadAddresses();
+      },
+      error: () => {
+        this.isLoading = false;
+      }
+    });
   }
 
-  handleDelete(selectedObject: any) {
-    const objectId = selectedObject.id;
-    this.addressService.deleteAddress(objectId)
-      .subscribe(
-        response => {
-          console.log("Address deleted successfully: ", response)
-          this.getAllAddresses();
-        },
-        error => {
-          console.error("Error deleting address:", error.error);
-          this.errorMessage = "Failed to delete address. Please try again later.";
-        }
-      );
+  handleDelete(selectedObject: any): void {
+    const id = selectedObject['id'] as string;
+    this.isLoading = true;
+    this.addressService.deleteAddress(id).subscribe({
+      next: () => {
+        this.myData = this.myData.filter(a => a.id !== id);
+        this.isLoading = false;
+        this.showAlert('Address deleted successfully.', 'success');
+      },
+      error: () => {
+        this.isLoading = false;
+      }
+    });
   }
 
-  ngOnDestroy() {
-    if (this.addressSubscription) {
-      this.addressSubscription.unsubscribe();
-    }
+  private showAlert(message: string, type: 'success' | 'error'): void {
+    this.alertMessage = message;
+    this.alertType = type;
+  }
+
+  ngOnDestroy(): void {
+    this.sub?.unsubscribe();
   }
 }

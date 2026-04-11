@@ -5,6 +5,6 @@ export interface User {
   firstName: string;
   lastName: string;
   rsaId: string;
-  dateOfBirth: Date;
+  dateOfBirth: Date | string;
   address: Address;
 }

@@ -3,5 +3,5 @@ export interface Product {
   productName: string;
   productNumber: string;
   quantity: number;
-  expirationDate: Date;
+  expirationDate: Date | string;
 }

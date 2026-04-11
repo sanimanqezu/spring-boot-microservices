@@ -1,114 +1,107 @@
-import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {RouterOutlet} from '@angular/router';
-import {SidebarComponent} from "../../shared/sidebar/sidebar.component";
-import {DataTableComponent} from "../../shared/data-table/data-table/data-table.component";
-import {Subscription} from "rxjs";
-import {UserService} from "../../services/user-service/user.service";
-import {User} from "../../modules/user.module";
-import {AlertComponent} from "../../shared/alert/alert.component";
-import {NgIf} from "@angular/common";
-import moment from 'moment';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { NgIf } from '@angular/common';
+import { Subscription } from 'rxjs';
+import { DataTableComponent } from '../../shared/data-table/data-table/data-table.component';
+import { AlertComponent } from '../../shared/alert/alert.component';
+import { UserService } from '../../services/user-service/user.service';
+import { User } from '../../modules/user.module';
 
 @Component({
-  selector: 'app-root',
+  selector: 'app-user',
   standalone: true,
-  imports: [RouterOutlet, SidebarComponent, DataTableComponent, AlertComponent, NgIf],
+  imports: [DataTableComponent, AlertComponent, NgIf],
   templateUrl: './user.component.html',
   styleUrl: './user.component.css'
 })
-
 export class UserComponent implements OnInit, OnDestroy {
-
-  @ViewChild(DataTableComponent) dataTableComponent!: DataTableComponent;
-  title: string = 'User';
-  headers: string[] = ['First Name', 'Last Name', 'Rsa Id', 'Date Of Birth', 'Address'];
+  title = 'User';
+  headers = ['First Name', 'Last Name', 'Rsa Id', 'Date Of Birth', 'Address'];
   myData: User[] = [];
-  userSubscription: Subscription | undefined;
-  dataTableObjectFields!: { label: string; value: string }[];
-  dataTableShowModal: boolean = false;
-  errorMessage: string = '';
+  isLoading = false;
+
+  alertMessage = '';
+  alertType: 'success' | 'error' | 'warning' | 'info' = 'error';
+
+  private sub?: Subscription;
 
   constructor(private userService: UserService) {}
 
-  ngOnInit() {
-    this.getAllUsers();
+  ngOnInit(): void {
+    this.loadUsers();
   }
 
-  getAllUsers() {
-    this.userSubscription = this.userService.getAllUsers()
-      .subscribe(
-        (response: any[]) => {
-          this.myData = response.map(user => ({
-            ...user,
-            dateOfBirth: this.formatExpirationDate(user.dateOfBirth)
-          }));
-          console.log("All users: ", this.myData);
-        },
-        error => {
-          console.error("Error retrieving users:", error.error);
-          this.errorMessage = "Failed to retrieve users. Please try again later.";
-        }
-      );
+  loadUsers(): void {
+    this.isLoading = true;
+    this.sub = this.userService.getAllUsers().subscribe({
+      next: (users) => {
+        this.myData = users.map(u => ({
+          ...u,
+          dateOfBirth: this.formatDate(u.dateOfBirth as unknown as number[])
+        }));
+        this.isLoading = false;
+      },
+      error: () => {
+        this.isLoading = false;
+      }
+    });
   }
 
-  formatExpirationDate(expirationDate: number[]): string {
-    const [year, month, day] = expirationDate;
-
-    let formattedDate = new Date(year, month - 1, day);
-
-    return formattedDate.toLocaleDateString();
-  }
-
-  handleSave(newObject: any) {
-    newObject.dateOfBirth = moment(newObject.dateOfBirth, "YYYY-MM-DD");
-    this.userService.addUser(newObject)
-      .subscribe(
-        response => {
-          this.getAllUsers();
-          console.log("Post response: ", response)
-          console.log("All users after post request: ", this.myData)
-        },
-        error => {
-          console.error("Error adding user:", error.error);
-          this.errorMessage = "Failed to add user. Please try again later.";
-        }
-      );
-  }
-
-  handleUpdate(selectedObject: any) {
-    selectedObject.dateOfBirth = moment(selectedObject.dateOfBirth, "YYYY-MM-DD");
-    const objectId = selectedObject.id;
-    this.userService.updateUser(objectId, selectedObject)
-      .subscribe(
-        response => {
-          console.log('User updated successfully:', response);
-          this.getAllUsers();
-        },
-        error => {
-          console.error('Error updating user:', error.error);
-          this.errorMessage = "Failed to update user. Please try again later.";
-        }
-      );
-  }
-
-  handleDelete(selectedObject: any) {
-    const objectId = selectedObject.id;
-    this.userService.deleteUser(objectId)
-      .subscribe(
-        response => {
-          console.log("User deleted successfully: ", response)
-          this.getAllUsers();
-        },
-        error => {
-          console.error("Error deleting user:", error.error);
-          this.errorMessage = "Failed to delete user. Please try again later.";
-        }
-      );
-  }
-
-  ngOnDestroy() {
-    if (this.userSubscription) {
-      this.userSubscription.unsubscribe();
+  private formatDate(date: number[] | string): string {
+    if (Array.isArray(date)) {
+      const [year, month, day] = date;
+      return new Date(year, month - 1, day).toLocaleDateString();
     }
+    return String(date);
+  }
+
+  handleSave(newObject: any): void {
+    this.isLoading = true;
+    this.userService.addUser(newObject as unknown as User).subscribe({
+      next: () => {
+        this.showAlert('User added successfully.', 'success');
+        this.loadUsers();
+      },
+      error: () => {
+        this.isLoading = false;
+      }
+    });
+  }
+
+  handleUpdate(selectedObject: any): void {
+    const id = selectedObject['id'] as string;
+    this.isLoading = true;
+    this.userService.updateUser(id, selectedObject as unknown as User).subscribe({
+      next: () => {
+        this.showAlert('User updated successfully.', 'success');
+        this.loadUsers();
+      },
+      error: () => {
+        this.isLoading = false;
+      }
+    });
+  }
+
+  handleDelete(selectedObject: any): void {
+    const id = selectedObject['id'] as string;
+    this.isLoading = true;
+    this.userService.deleteUser(id).subscribe({
+      next: () => {
+        this.myData = this.myData.filter(u => u.id !== id);
+        this.isLoading = false;
+        this.showAlert('User deleted successfully.', 'success');
+      },
+      error: () => {
+        this.isLoading = false;
+      }
+    });
+  }
+
+  private showAlert(message: string, type: 'success' | 'error'): void {
+    this.alertMessage = message;
+    this.alertType = type;
+  }
+
+  ngOnDestroy(): void {
+    this.sub?.unsubscribe();
   }
 }

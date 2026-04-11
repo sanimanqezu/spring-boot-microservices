@@ -1,1 +1,21 @@
-/* You can add global styles to this file, and also import other style files */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f4f6fb;
+  color: #222;
+}
+
+h1 {
+  font-size: 22px;
+  margin-bottom: 16px;
+}
+
+/* Page containers — offset for the 150px sidebar */
+.container {
+  padding: 24px 24px 24px 174px;
+  min-height: calc(100vh - 48px);
+}

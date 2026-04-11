@@ -1,44 +1,101 @@
 .dashboard {
-  padding: 20px;
+  padding: 24px;
 }
 
 .container {
-  padding-left: 150px;
-  max-width: 1200px;
-  margin: 0 auto;
+  padding-left: 170px;
+  max-width: 1100px;
 }
 
-.card {
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-  margin-top: 20px;
+h1 {
+  color: #222;
+  margin-bottom: 24px;
+  font-size: 24px;
 }
 
-.card h2 {
-  margin-top: 0;
-  color: #333;
+/* Stat cards grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
 }
 
-.card ul {
-  list-style-type: none;
-  padding: 0;
+.stat-card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  transition: box-shadow 0.2s;
 }
 
-.card ul li {
-  margin-bottom: 10px;
+.stat-card:hover {
+  box-shadow: 0 4px 16px rgba(38, 57, 183, 0.15);
 }
 
-.card ul li strong {
-  color: #007bff;
+.stat-icon {
+  font-size: 28px;
+  color: #2639b7;
 }
 
-.card ul li a {
-  color: #007bff;
+.stat-number {
+  font-size: 36px;
+  font-weight: 700;
+  color: #2639b7;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: #555;
+  font-weight: 500;
+}
+
+.stat-link {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #2639b7;
   text-decoration: none;
+  border: 1px solid #2639b7;
+  border-radius: 4px;
+  padding: 4px 12px;
+  transition: background-color 0.2s, color 0.2s;
 }
 
-.card ul li a:hover {
-  text-decoration: underline;
+.stat-link:hover {
+  background-color: #2639b7;
+  color: #fff;
+}
+
+/* Loading / error cards */
+.loading-card,
+.error-card {
+  background: #f9f9f9;
+  border-radius: 8px;
+  padding: 24px;
+  text-align: center;
+  color: #555;
+}
+
+.error-card {
+  background: #fff3f3;
+  color: #c62828;
+}
+
+.retry-btn {
+  margin-top: 12px;
+  padding: 8px 20px;
+  background: #2639b7;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.retry-btn:hover {
+  background: #1a2a8c;
 }

@@ -1,44 +1,29 @@
-import {Injectable} from '@angular/core';
-import {RequestService} from "../request-service/request.service";
-import {map, Observable} from "rxjs";
-import {Address} from "../../modules/address.module";
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { RequestService } from '../request-service/request.service';
+import { Address } from '../../modules/address.module';
+import { environment } from '../../../environments/environment';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class AddressService {
 
-  baseUrl = "http://localhost:7002/address-service/addresses"
+  private readonly baseUrl = `${environment.apiUrl}/address-service/addresses`;
 
-  constructor(private requestService: RequestService) { }
+  constructor(private requestService: RequestService) {}
 
   addAddress(body: Address): Observable<Address> {
-    console.log("Body: ", body)
-    const url = this.baseUrl;
-    return this.requestService.postForObject<Address>(url, body)
-      .pipe(
-        map((response: Address) => response)
-      );
+    return this.requestService.postForObject<Address>(this.baseUrl, body);
   }
 
   getAllAddresses(): Observable<Address[]> {
-    const url = this.baseUrl;
-    return this.requestService.getForObject<Address[]>(url)
-      .pipe(
-        map((response: Address[]) => response)
-      );
+    return this.requestService.getForObject<Address[]>(this.baseUrl);
   }
 
-  updateAddress(id: string, body: Address): Observable<Address[]> {
-    const url = `${this.baseUrl}/id?id=${id}`;
-    return this.requestService.putForObject<Address[]>(url, body);
+  updateAddress(id: string, body: Address): Observable<void> {
+    return this.requestService.putForObject<void>(`${this.baseUrl}/id?id=${id}`, body);
   }
 
-  deleteAddress(id: string): Observable<Address[]> {
-    const url = `${this.baseUrl}/id?id=${id}`;
-    return this.requestService.deleteForObject<Address[]>(url)
-      .pipe(
-        map((response: Address[]) => response)
-      );
+  deleteAddress(id: string): Observable<void> {
+    return this.requestService.deleteForObject<void>(`${this.baseUrl}/id?id=${id}`);
   }
 }

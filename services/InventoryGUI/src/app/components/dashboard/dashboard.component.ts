@@ -1,73 +1,60 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {RouterLink} from "@angular/router";
-import {UserService} from "../../services/user-service/user.service";
-import {ProductService} from "../../services/product-service/product.service";
-import {OrderService} from "../../services/order-service/order.service";
-import {Subscription} from "rxjs";
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { NgIf } from '@angular/common';
+import { Subscription, forkJoin } from 'rxjs';
+import { UserService } from '../../services/user-service/user.service';
+import { ProductService } from '../../services/product-service/product.service';
+import { OrderService } from '../../services/order-service/order.service';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [
-    RouterLink
-  ],
+  imports: [RouterLink, NgIf],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
 })
 export class DashboardComponent implements OnInit, OnDestroy {
-  users: number;
-  products: number;
-  orders: number;
-  usersSubscription!: Subscription;
-  productsSubscription!: Subscription;
-  ordersSubscription!: Subscription;
+  userCount = 0;
+  productCount = 0;
+  orderCount = 0;
+  isLoading = true;
+  loadError = false;
 
-  constructor(private userService: UserService,
-              private productService: ProductService,
-              private orderService: OrderService) {
-    this.users = 0;
-    this.products = 0;
-    this.orders = 0;
+  private sub?: Subscription;
+
+  constructor(
+    private userService: UserService,
+    private productService: ProductService,
+    private orderService: OrderService
+  ) {}
+
+  ngOnInit(): void {
+    this.loadStats();
   }
 
-  ngOnInit() {
-    this.getAllOrders();
-    this.getAllProducts();
-    this.getAllUsers();
+  loadStats(): void {
+    this.isLoading = true;
+    this.loadError = false;
+
+    this.sub = forkJoin({
+      users: this.userService.getAllUsers(),
+      products: this.productService.getAllProducts(),
+      orders: this.orderService.getAllOrders()
+    }).subscribe({
+      next: ({ users, products, orders }) => {
+        this.userCount = users.length;
+        this.productCount = products.length;
+        this.orderCount = orders.length;
+        this.isLoading = false;
+      },
+      error: () => {
+        this.loadError = true;
+        this.isLoading = false;
+      }
+    });
   }
 
-  ngOnDestroy() {
-    if (this.ordersSubscription != null) {
-      this.ordersSubscription.unsubscribe();
-    }
-
-    if (this.productsSubscription != null) {
-      this.productsSubscription.unsubscribe();
-    }
-
-    if (this.usersSubscription != null) {
-      this.usersSubscription.unsubscribe();
-    }
-  }
-
-  getAllUsers() {
-    this.usersSubscription = this.userService.getAllUsers()
-      .subscribe(resp => {
-        this.users = resp.length;
-      })
-  }
-
-  getAllProducts() {
-    this.productsSubscription = this.productService.getAllProducts()
-      .subscribe(resp => {
-        this.products = resp.length;
-      })
-  }
-
-  getAllOrders() {
-    this.ordersSubscription = this.orderService.getAllOrders()
-      .subscribe(resp => {
-        this.orders = resp.length;
-      })
+  ngOnDestroy(): void {
+    this.sub?.unsubscribe();
   }
 }

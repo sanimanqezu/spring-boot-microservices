@@ -1,155 +1,226 @@
+<!-- Filter bar -->
 <div class="filter-section">
-
+  <input
+    type="text"
+    class="filter-input"
+    placeholder="Search..."
+    [(ngModel)]="filterText"
+    (ngModelChange)="applyFilter()"
+    aria-label="Filter records"
+  />
+  <span class="filter-count">{{ filteredData.length }} record(s)</span>
 </div>
 
+<!-- Loading indicator -->
+<div *ngIf="isLoading" class="loading-bar" aria-live="polite">Loading...</div>
+
+<!-- Table -->
 <div class="table-section">
-  <table class="table">
-
+  <table class="table" aria-label="Data table">
     <thead>
-    <tr>
-      <th>ID</th>
-      <th *ngFor="let header of headers">{{ header.toUpperCase() }}</th>
-      <th>ACTIONS</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    <ng-container *ngIf="data && data.length > 0; else noData">
-      <tr *ngFor="let item of data; let i = index">
-        <td>{{ i + 1 }}</td>
-        <ng-container *ngFor="let header of headers">
-          <td *ngIf="header !== 'Order Items' && header !== 'Address' ">{{ item[toCamelCase(header)] }}</td>
-          <td *ngIf="header === 'Order Items'">
-            <table class="inner-table">
-              <thead>
-              <th>Product Name</th>
-              <th>Quantity</th>
-              </thead>
-              <tbody>
-              <tr *ngFor="let orderItem of item.orderItems">
-                <td>{{ orderItem.productName }}</td>
-                <td>{{ orderItem.quantity }}</td>
-              </tr>
-              </tbody>
-            </table>
-          </td>
-
-          <td *ngIf="header === 'Address'">
-            <table class="inner-table">
-              <thead>
-              <th>House Number</th>
-              <th>Street Name</th>
-              <th>City</th>
-              <th>Zip Code</th>
-              </thead>
-              <tbody>
-              <tr>
-                <td>{{ item.address.houseNumber }}</td>
-                <td>{{ item.address.streetName }}</td>
-                <td>{{ item.address.city }}</td>
-                <td>{{ item.address.zipCode }}</td>
-              </tr>
-              </tbody>
-            </table>
-          </td>
-        </ng-container>
-        <td>
-          <button class="action-button update-button" (click)="openUpdateModal(item.id)" [disabled]="modalOpened">
-            Update
-          </button>
-          <button class="action-button delete-button" (click)="openConfirmationModal(item.id)" [disabled]="modalOpened">
-            Delete
-          </button>
-        </td>
-      </tr>
-    </ng-container>
-    <ng-template #noData>
       <tr>
-        <td [attr.colspan]="headers.length + 2">No data available</td>
+        <th scope="col">#</th>
+        <th scope="col" *ngFor="let header of headers">{{ header.toUpperCase() }}</th>
+        <th scope="col">ACTIONS</th>
       </tr>
-    </ng-template>
+    </thead>
+    <tbody>
+      <ng-container *ngIf="pagedData && pagedData.length > 0; else noData">
+        <tr *ngFor="let item of pagedData; let i = index">
+          <td>{{ (currentPage - 1) * pageSize + i + 1 }}</td>
+          <ng-container *ngFor="let header of headers">
+            <td *ngIf="header !== 'Order Items' && header !== 'Address'">
+              {{ item[toCamelCase(header)] }}
+            </td>
+            <td *ngIf="header === 'Order Items'">
+              <table class="inner-table" *ngIf="item['orderItems']">
+                <thead>
+                  <tr><th>Product Name</th><th>Quantity</th></tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let oi of item['orderItems']">
+                    <td>{{ oi.productName }}</td>
+                    <td>{{ oi.quantity }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </td>
+            <td *ngIf="header === 'Address'">
+              <table class="inner-table" *ngIf="item['address']">
+                <thead>
+                  <tr>
+                    <th>House No</th><th>Street</th><th>City</th><th>Zip</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>{{ item['address'].houseNumber }}</td>
+                    <td>{{ item['address'].streetName }}</td>
+                    <td>{{ item['address'].city }}</td>
+                    <td>{{ item['address'].zipCode }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </td>
+          </ng-container>
+          <td>
+            <button
+              class="action-button update-button"
+              (click)="openUpdateModal($any(item['id']))"
+              [disabled]="modalOpened || isLoading"
+              aria-label="Update record"
+            >Update</button>
+            <button
+              class="action-button delete-button"
+              (click)="openConfirmationModal($any(item['id']))"
+              [disabled]="modalOpened || isLoading"
+              aria-label="Delete record"
+            >Delete</button>
+          </td>
+        </tr>
+      </ng-container>
+      <ng-template #noData>
+        <tr>
+          <td [attr.colspan]="headers.length + 2" class="no-data">
+            {{ isLoading ? 'Loading...' : 'No records found.' }}
+          </td>
+        </tr>
+      </ng-template>
     </tbody>
   </table>
 </div>
 
-<button class="add-button" (click)="openModal()" [disabled]="modalOpened">Add</button>
+<!-- Pagination -->
+<div class="pagination" *ngIf="totalPages > 1">
+  <button class="page-btn" (click)="prevPage()" [disabled]="currentPage === 1" aria-label="Previous page">&#8249;</button>
+  <button
+    *ngFor="let page of pages"
+    class="page-btn"
+    [ngClass]="{ active: page === currentPage }"
+    (click)="goToPage(page)"
+    [attr.aria-label]="'Page ' + page"
+    [attr.aria-current]="page === currentPage ? 'page' : null"
+  >{{ page }}</button>
+  <button class="page-btn" (click)="nextPage()" [disabled]="currentPage === totalPages" aria-label="Next page">&#8250;</button>
+</div>
 
-<div class="modal" *ngIf="showModal">
-  <div class="modal-dialog">
+<!-- Add button -->
+<button
+  class="add-button"
+  (click)="openModal()"
+  [disabled]="modalOpened || isLoading"
+  aria-label="Add new record"
+  title="Add new record"
+>+</button>
+
+<!-- Add / Update Modal -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()"></div>
+<div class="modal" *ngIf="showModal" role="dialog" aria-modal="true" [attr.aria-label]="title + ' form'">
+  <div class="modal-dialog" (click)="$event.stopPropagation()">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">{{ title }}</h5>
-        <button type="button" class="close" (click)="closeModal()">&times;</button>
+        <h5 class="modal-title">{{ isUpdating ? 'Update ' + title : 'Add ' + title }}</h5>
+        <button type="button" class="close" (click)="closeModal()" aria-label="Close">&times;</button>
       </div>
       <div class="modal-body">
+
+        <!-- Validation error -->
+        <div *ngIf="validationError" class="validation-error" role="alert">
+          {{ validationError }}
+        </div>
+
+        <!-- Standard fields -->
         <ng-container *ngFor="let field of objectFields">
-          <div class="form-group" *ngIf="field.label !== 'Order Items' && field.label !== 'Address' ">
-            <label>{{ field.label }}</label>
-            <input *ngIf="field.label !== 'Expiration Date' && field.label !== 'Date Of Birth'" type="text" class="form-control" [(ngModel)]="field.value">
-            <input *ngIf="field.label === 'Expiration Date'" type="datetime-local" class="form-control" [(ngModel)]="field.value">
-            <input *ngIf="field.label === 'Date Of Birth'" type="date" class="form-control" [(ngModel)]="field.value">
+          <div class="form-group" *ngIf="field.label !== 'Order Items' && field.label !== 'Address'">
+            <label>{{ field.label }} <span class="required">*</span></label>
+            <input
+              *ngIf="field.label !== 'Expiration Date' && field.label !== 'Date Of Birth'"
+              type="text"
+              class="form-control"
+              [(ngModel)]="field.value"
+              [placeholder]="field.label"
+              [attr.aria-label]="field.label"
+            />
+            <input
+              *ngIf="field.label === 'Expiration Date'"
+              type="datetime-local"
+              class="form-control"
+              [(ngModel)]="field.value"
+              [attr.aria-label]="field.label"
+            />
+            <input
+              *ngIf="field.label === 'Date Of Birth'"
+              type="date"
+              class="form-control"
+              [(ngModel)]="field.value"
+              [attr.aria-label]="field.label"
+            />
           </div>
         </ng-container>
 
-        <div *ngIf="title.endsWith('Order') ">
+        <!-- Order Items section -->
+        <div *ngIf="title === 'Order' || title === 'Add Order' || title === 'Update Order'">
           <h5>Order Items</h5>
-          <div *ngFor="let orderItem of orderItems; let i = index">
+          <div *ngFor="let orderItem of orderItems; let i = index" class="order-item-row">
             <div class="form-group">
               <label>Product Name</label>
-              <input type="text" class="form-control" [(ngModel)]="orderItem.productName">
+              <input type="text" class="form-control" [(ngModel)]="orderItem.productName" placeholder="Product name" />
             </div>
             <div class="form-group">
               <label>Quantity</label>
-              <input type="number" class="form-control" [(ngModel)]="orderItem.quantity">
+              <input type="number" class="form-control" [(ngModel)]="orderItem.quantity" min="1" />
             </div>
-            <button type="button" class="btn btn-danger" (click)="removeOrderItem(i)">Remove</button>
+            <button type="button" class="btn btn-danger btn-sm" (click)="removeOrderItem(i)">Remove</button>
           </div>
-          <button type="button" class="btn btn-primary" (click)="addOrderItem()">Add Order Item</button>
+          <button type="button" class="btn btn-secondary btn-sm" (click)="addOrderItem()">+ Add Item</button>
         </div>
 
-        <div *ngIf="title.endsWith('User')">
+        <!-- Address section -->
+        <div *ngIf="title === 'User' || title === 'Add User' || title === 'Update User'">
           <h5>Address</h5>
           <div class="form-group">
             <label>Street Name</label>
-            <input type="text" class="form-control" [(ngModel)]="userAddress.streetName">
+            <input type="text" class="form-control" [(ngModel)]="userAddress.streetName" placeholder="Street name" />
           </div>
           <div class="form-group">
             <label>House Number</label>
-            <input type="text" class="form-control" [(ngModel)]="userAddress.houseNumber">
+            <input type="text" class="form-control" [(ngModel)]="userAddress.houseNumber" placeholder="House number" />
           </div>
           <div class="form-group">
             <label>City</label>
-            <input type="text" class="form-control" [(ngModel)]="userAddress.city">
+            <input type="text" class="form-control" [(ngModel)]="userAddress.city" placeholder="City" />
           </div>
           <div class="form-group">
             <label>Zip Code</label>
-            <input type="text" class="form-control" [(ngModel)]="userAddress.zipCode">
+            <input type="text" class="form-control" [(ngModel)]="userAddress.zipCode" placeholder="Zip code" />
           </div>
         </div>
 
       </div>
       <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeModal()">Cancel</button>
         <button type="button" class="btn btn-primary" *ngIf="!isUpdating" (click)="saveObject()">Save</button>
         <button type="button" class="btn btn-primary" *ngIf="isUpdating" (click)="updateObject()">Update</button>
-        <button type="button" class="btn btn-secondary" (click)="closeModal()">Close</button>
       </div>
     </div>
   </div>
 </div>
 
-<div class="confirmation-modal" *ngIf="showConfirmationModal">
-  <div class="modal-dialog">
+<!-- Delete confirmation modal -->
+<div class="modal-overlay" *ngIf="showConfirmationModal" (click)="closeConfirmationModal()"></div>
+<div class="modal" *ngIf="showConfirmationModal" role="dialog" aria-modal="true" aria-label="Confirm deletion">
+  <div class="modal-dialog" (click)="$event.stopPropagation()">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">Confirm Deletion</h5>
-        <button type="button" class="close" (click)="closeConfirmationModal()">&times;</button>
+        <button type="button" class="close" (click)="closeConfirmationModal()" aria-label="Close">&times;</button>
       </div>
       <div class="modal-body">
-        Are you sure you want to delete the selected object?
+        Are you sure you want to delete this record? This action cannot be undone.
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-danger" (click)="confirmDeletion()">Yes</button>
-        <button type="button" class="btn btn-secondary" (click)="closeConfirmationModal()">No</button>
+        <button type="button" class="btn btn-secondary" (click)="closeConfirmationModal()">Cancel</button>
+        <button type="button" class="btn btn-danger" (click)="confirmDeletion()">Delete</button>
       </div>
     </div>
   </div>
