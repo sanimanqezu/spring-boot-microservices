@@ -17,11 +17,11 @@ public interface IOrdersService {
 
     List<OrderDTO> getOrdersByNumber(String orderNumber);
 
-    List<OrderDTO> getOrdersByQuality(Integer quality);
+    List<OrderDTO> getOrdersByQuantity(Integer quantity);
 
     OrderDTO getOrderByOrdererIdNo(String ordererIdNo);
 
     void updateOrder(UUID id, OrderDTO updatedOrder);
 
-    List<OrderDTO> searchOrders(UUID id, String orderNumber, Integer quality);
+    List<OrderDTO> searchOrders(UUID id, String orderNumber, Integer quantity);
 }

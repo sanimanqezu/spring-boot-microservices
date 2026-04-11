@@ -73,12 +73,10 @@ public class UsersServiceImpl implements IUsersService {
 
     @Override
     public UserDTO getUserById(UUID id) {
-        UserDTO userOptional = UserMapper.USER_MAPPER.userToUserDTO(userRepository.findById(String.valueOf(id)).get());
-
-        if (userOptional == null) {
-            throw new UserNotFoundException("Id", id);
-        }
-        return userOptional;
+        return UserMapper.USER_MAPPER.userToUserDTO(
+            userRepository.findById(String.valueOf(id))
+                .orElseThrow(() -> new UserNotFoundException("Id", id))
+        );
     }
 
     @Override
@@ -143,7 +141,9 @@ public class UsersServiceImpl implements IUsersService {
     public List<UserDTO> searchUsers(UUID id, String firstName, String lastName, String rsaId, LocalDate dateOfBirth, String address) {
         List<UserDTO> users = new ArrayList<>();
         if (id != null) {
-            users.add(UserMapper.USER_MAPPER.userToUserDTO(userRepository.findById(String.valueOf(id)).get()));
+            userRepository.findById(String.valueOf(id))
+                .map(UserMapper.USER_MAPPER::userToUserDTO)
+                .ifPresent(users::add);
         }
         if (firstName != null && !firstName.isEmpty()) {
             users.addAll(UserMapper.USER_MAPPER.userToUserDTO(userRepository.findByFirstNameIgnoreCase(firstName)));
@@ -162,7 +162,7 @@ public class UsersServiceImpl implements IUsersService {
         }
 
         if (users.isEmpty()){
-            throw new UsersNotFoundException("No users were found0");
+            throw new UsersNotFoundException("No users were found");
         }
         return users;
     }

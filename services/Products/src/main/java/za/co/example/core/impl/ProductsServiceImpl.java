@@ -3,6 +3,7 @@ package za.co.example.core.impl;
 import com.example.products_service.models.ProductDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import za.co.example.core.services.IProductsService;
 import za.co.example.exceptions.ProductNotFoundException;
 import za.co.example.exceptions.ProductsNotFoundException;
@@ -24,6 +25,7 @@ public class ProductsServiceImpl implements IProductsService {
         this.productRepository = productRepository;
     }
 
+    @Transactional
     @Override
     public void addProduct(ProductDTO productDTO) {
         String productNumber = productDTO.getProductNumber();
@@ -34,6 +36,7 @@ public class ProductsServiceImpl implements IProductsService {
         productRepository.save(ProductMapper.PRODUCT_MAPPER.dtoToEntity(productDTO));
     }
 
+    @Transactional
     @Override
     public void removeProduct(UUID id) {
         boolean product = productRepository.existsById(String.valueOf(id));
@@ -56,12 +59,10 @@ public class ProductsServiceImpl implements IProductsService {
 
     @Override
     public ProductDTO getProductById(UUID id) {
-        ProductDTO productOptional = ProductMapper.PRODUCT_MAPPER.entityToDto(productRepository.findById(String.valueOf(id)).get());
-
-        if (productOptional == null) {
-            throw new ProductNotFoundException("Id", id);
-        }
-        return productOptional;
+        return ProductMapper.PRODUCT_MAPPER.entityToDto(
+            productRepository.findById(String.valueOf(id))
+                .orElseThrow(() -> new ProductNotFoundException("Id", id))
+        );
     }
 
     @Override
@@ -92,6 +93,7 @@ public class ProductsServiceImpl implements IProductsService {
         return products;
     }
 
+    @Transactional
     @Override
     public void updateProduct(UUID id, ProductDTO updatedProduct) {
         ProductDTO existingProduct = getProductById(id);
@@ -108,7 +110,9 @@ public class ProductsServiceImpl implements IProductsService {
     public List<ProductDTO> searchProducts(UUID id, String productName, String productNumber, Integer quantity, LocalDateTime expirationDate) {
         List<ProductDTO> products = new ArrayList<>();
         if (id != null) {
-            products.add(ProductMapper.PRODUCT_MAPPER.entityToDto(productRepository.findById(String.valueOf(id)).get()));
+            productRepository.findById(String.valueOf(id))
+                .map(ProductMapper.PRODUCT_MAPPER::entityToDto)
+                .ifPresent(products::add);
         }
         if (productName != null && !productName.isEmpty()) {
             products.add(ProductMapper.PRODUCT_MAPPER.entityToDto(productRepository.findByProductName(productName)));
@@ -129,7 +133,7 @@ public class ProductsServiceImpl implements IProductsService {
     public List<ProductDTO> getProductsByQuantity(Integer quantity) {
         List<ProductDTO> products = ProductMapper.PRODUCT_MAPPER.entityToDto(productRepository.findByQuantity(quantity));
         if (products == null || products.isEmpty()) {
-            throw new ProductsNotFoundException("Quality", quantity);
+            throw new ProductsNotFoundException("Quantity", quantity);
         }
         return products;
     }

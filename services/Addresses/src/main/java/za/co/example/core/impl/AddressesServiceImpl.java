@@ -3,6 +3,7 @@ package za.co.example.core.impl;
 import com.example.addresses_service.models.AddressDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import za.co.example.core.services.IAddressesService;
 import za.co.example.exceptions.AddressNotFoundException;
 import za.co.example.exceptions.AddressesNotFoundException;
@@ -22,6 +23,7 @@ public class AddressesServiceImpl implements IAddressesService {
     public AddressesServiceImpl(AddressRepository addressRepository) {this.addressRepository = addressRepository;
     }
 
+    @Transactional
     @Override
     public AddressDTO addAddress(AddressDTO addressDTO) {
         String houseNumber = addressDTO.getHouseNumber();
@@ -32,6 +34,7 @@ public class AddressesServiceImpl implements IAddressesService {
         return AddressMapper.ADDRESS_MAPPER.entityToDto(addressRepository.save(AddressMapper.ADDRESS_MAPPER.dtoToEntity(addressDTO)));
     }
 
+    @Transactional
     @Override
     public void removeAddress(UUID id) {
         boolean address = addressRepository.existsById(String.valueOf(id));
@@ -53,12 +56,10 @@ public class AddressesServiceImpl implements IAddressesService {
 
     @Override
     public AddressDTO getAddressById(UUID id) {
-        AddressDTO AddressOptional = AddressMapper.ADDRESS_MAPPER.entityToDto(addressRepository.findById(String.valueOf(id)).get());
-
-        if (AddressOptional == null) {
-            throw new AddressNotFoundException("Id", id);
-        }
-        return AddressOptional;
+        return AddressMapper.ADDRESS_MAPPER.entityToDto(
+            addressRepository.findById(String.valueOf(id))
+                .orElseThrow(() -> new AddressNotFoundException("Id", id))
+        );
     }
 
     @Override
@@ -97,6 +98,7 @@ public class AddressesServiceImpl implements IAddressesService {
         return addresses;
     }
 
+    @Transactional
     @Override
     public void updateAddress(UUID id, AddressDTO updatedAddress) {
         AddressDTO existingAddress = getAddressById(id);
@@ -132,7 +134,9 @@ public class AddressesServiceImpl implements IAddressesService {
     public List<AddressDTO> searchAddresses(UUID id, String city, String streetName, String houseNumber, String zipCode) {
         List<AddressDTO> addresses = new ArrayList<>();
         if (id != null) {
-            addresses.add(AddressMapper.ADDRESS_MAPPER.entityToDto(addressRepository.findById(String.valueOf(id)).get()));
+            addressRepository.findById(String.valueOf(id))
+                .map(AddressMapper.ADDRESS_MAPPER::entityToDto)
+                .ifPresent(addresses::add);
         }
         if (city != null && !city.isEmpty()) {
             addresses.addAll(AddressMapper.ADDRESS_MAPPER.entityToDto(addressRepository.findByCity(city)));

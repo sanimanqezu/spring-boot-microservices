@@ -4,9 +4,11 @@ import com.example.orders_service.models.OrderDTO;
 import com.example.orders_service.models.OrderItemDTO;
 import com.example.orders_service.models.ProductDTO;
 import com.example.orders_service.models.UserDTO;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import za.co.example.core.services.IOrdersService;
 import za.co.example.exceptions.OrderNotFoundException;
 import za.co.example.exceptions.OrdersNotFoundException;
@@ -34,10 +36,12 @@ public class OrdersServiceImpl implements IOrdersService {
         this.userFeignClient = userFeignClient;
     }
 
+    @CircuitBreaker(name = "orderService", fallbackMethod = "addOrderFallback")
+    @Transactional
     @Override
     public void addOrder(OrderDTO orderDTO) {
 
-        if (orderDTO.getOrdererIdNo() != null || !orderDTO.getOrdererIdNo().isEmpty()) {
+        if (orderDTO.getOrdererIdNo() != null && !orderDTO.getOrdererIdNo().isEmpty()) {
             UserDTO userDTO = userFeignClient.getUserByRsaId(orderDTO.getOrdererIdNo());
 
             if (!userDTO.getRsaId().equals(orderDTO.getOrdererIdNo())) {
@@ -70,7 +74,7 @@ public class OrdersServiceImpl implements IOrdersService {
                         throw new OrderNotFoundException("There are " + availableQuantity + " " + productDTO.getProductName() + " in stock!");
                     }
                 } else {
-                    throw new OrderNotFoundException("There are no products with name {}", orderItemDTO.getProductName());
+                    throw new OrderNotFoundException("There are no products with name: " + orderItemDTO.getProductName());
                 }
             }
         }
@@ -89,7 +93,8 @@ public class OrdersServiceImpl implements IOrdersService {
         orderRepository.save(OrderMapper.ORDER_MAPPER.orderDtoToOrder(orderDTO));
     }
 
-        @Override
+    @Transactional
+    @Override
     public void removeOrder(UUID id) {
         boolean order = orderRepository.existsById(String.valueOf(id));
 
@@ -112,12 +117,10 @@ public class OrdersServiceImpl implements IOrdersService {
 
     @Override
     public OrderDTO getOrderById(UUID id) {
-        OrderDTO orderOptional = OrderMapper.ORDER_MAPPER.orderToOrderDto(orderRepository.findById(String.valueOf(id)).get());
-
-        if (orderOptional == null) {
-            throw new OrderNotFoundException("Id", id);
-        }
-        return orderOptional;
+        return OrderMapper.ORDER_MAPPER.orderToOrderDto(
+            orderRepository.findById(String.valueOf(id))
+                .orElseThrow(() -> new OrderNotFoundException("Id", id))
+        );
     }
 
     @Override
@@ -130,10 +133,10 @@ public class OrdersServiceImpl implements IOrdersService {
     }
 
     @Override
-    public List<OrderDTO> getOrdersByQuality(Integer quantity) {
+    public List<OrderDTO> getOrdersByQuantity(Integer quantity) {
         List<OrderDTO> orders = OrderMapper.ORDER_MAPPER.orderToOrderDto(orderRepository.findByQuantity(quantity));
         if (orders == null || orders.isEmpty()) {
-            throw new OrdersNotFoundException("Quality", quantity);
+            throw new OrdersNotFoundException("Quantity", quantity);
         }
         return orders;
     }
@@ -143,6 +146,7 @@ public class OrdersServiceImpl implements IOrdersService {
         return OrderMapper.ORDER_MAPPER.orderToOrderDto(orderRepository.findByOrdererIdNo(ordererIdNo));
     }
 
+    @Transactional
     @Override
     public void updateOrder(UUID id, OrderDTO updatedOrderDTO) {
         OrderDTO existingOrder = getOrderById(id);
@@ -173,7 +177,7 @@ public class OrdersServiceImpl implements IOrdersService {
                             throw new OrderNotFoundException("There are " + availableQuantity + " " + productDTO.getProductName() + " in stock!");
                         }
                     } else {
-                        throw new OrderNotFoundException("There are no products with name {}", orderItemDTO.getProductName());
+                        throw new OrderNotFoundException("There are no products with name: " + orderItemDTO.getProductName());
                     }
                 }
                 existingOrder.setOrderItems(updatedOrderItems);
@@ -187,7 +191,9 @@ public class OrdersServiceImpl implements IOrdersService {
     public List<OrderDTO> searchOrders(UUID id, String orderNumber, Integer quantity) {
         List<OrderDTO> orders = new ArrayList<>();
         if (id != null) {
-            orders.add(OrderMapper.ORDER_MAPPER.orderToOrderDto(orderRepository.findById(String.valueOf(id)).get()));
+            orderRepository.findById(String.valueOf(id))
+                .map(OrderMapper.ORDER_MAPPER::orderToOrderDto)
+                .ifPresent(orders::add);
         }
         if (orderNumber != null && !orderNumber.isEmpty()) {
             orders.addAll(OrderMapper.ORDER_MAPPER.orderToOrderDto(orderRepository.findByOrderNumber(orderNumber)));
@@ -197,5 +203,10 @@ public class OrdersServiceImpl implements IOrdersService {
         }
 
         return orders;
+    }
+
+    public void addOrderFallback(OrderDTO orderDTO, Throwable t) {
+        log.error("Circuit breaker triggered for addOrder. Downstream service unavailable: {}", t.getMessage());
+        throw new OrderNotFoundException("Order service is temporarily unavailable. Please try again later.");
     }
 }
