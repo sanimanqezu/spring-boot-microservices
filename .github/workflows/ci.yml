@@ -1,0 +1,31 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  backend:
+    name: Services (Maven)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+      - name: Build all services
+        run: mvn -B clean verify
+
+  frontend:
+    name: InventoryGUI (Angular)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/InventoryGUI
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci || npm install
+      - run: npm run build
